@@ -4,7 +4,7 @@ import type { SearchEntry } from '@rift/engine/layout/SearchPalette';
 import { PATCH } from '@/lib/assets';
 import { defineMessages, type Locale } from '@/lib/i18n';
 
-export const SITE_NAME = 'Rift Codex';
+export const SITE_NAME = 'RiftDen';
 
 /** Знак — клавиша R: в игре на ней висит абсолютное умение. */
 export const SITE_MARK = (
@@ -17,7 +17,7 @@ export const SITE_MARK = (
 
 const TEXT = defineMessages({
   ru: {
-    title: 'Rift Codex — чемпионы League of Legends',
+    title: 'RiftDen — чемпионы League of Legends',
     description:
       'Характеристики всех чемпионов League of Legends на каждом уровне, умения с перезарядкой и видео, предметы, руны и билды, карта Рунтерры, тир-лист и сравнение.',
     champions: 'Чемпионы',
@@ -53,7 +53,7 @@ const TEXT = defineMessages({
     media: 'Изображения и видео загружаются с серверов Riot.',
   },
   en: {
-    title: 'Rift Codex — League of Legends champions',
+    title: 'RiftDen — League of Legends champions',
     description:
       'Stats of every League of Legends champion at every level, abilities with cooldowns and videos, items, runes and builds, the map of Runeterra, a tier list and comparisons.',
     champions: 'Champions',
@@ -176,13 +176,13 @@ export function getSite(lang: Locale, { withArticles }: { withArticles: boolean 
 /** Оговорка Riot для фан-сайтов (Legal Jibber Jabber): английский текст обязателен на всех языках. */
 const LEGAL_RU = (
   <p key="ru">
-    Rift Codex не одобрен Riot Games и не отражает взгляды или мнения Riot Games или кого-либо, официально участвующего в создании или управлении проектами
+    RiftDen не одобрен Riot Games и не отражает взгляды или мнения Riot Games или кого-либо, официально участвующего в создании или управлении проектами
     Riot Games. Riot Games и все связанные проекты — товарные знаки или зарегистрированные товарные знаки Riot Games, Inc.
   </p>
 );
 const LEGAL_EN = (
   <p key="en" lang="en">
-    Rift Codex isn&apos;t endorsed by Riot Games and doesn&apos;t reflect the views or opinions of Riot Games or anyone officially involved in producing or
+    RiftDen isn&apos;t endorsed by Riot Games and doesn&apos;t reflect the views or opinions of Riot Games or anyone officially involved in producing or
     managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
   </p>
 );

@@ -10,7 +10,7 @@ export const CATEGORIES = {
   en: ['Mechanics', 'Macro', 'Beginners', 'Analytics'],
 } as const satisfies Record<Locale, readonly string[]>;
 
-const AUTHOR: Record<Locale, string> = { ru: 'Редакция Rift Codex', en: 'Rift Codex editors' };
+const AUTHOR: Record<Locale, string> = { ru: 'Редакция RiftDen', en: 'RiftDen editors' };
 
 type Cover = { champion: string; skin: number };
 

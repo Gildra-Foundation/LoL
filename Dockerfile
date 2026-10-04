@@ -1,4 +1,4 @@
-# Сайт Rift Codex (apps/lol) вместе с движком из подмодуля packages/engine.
+# Сайт RiftDen (apps/lol) вместе с движком из подмодуля packages/engine.
 # Сборка: docker build -t riftden-web --build-arg SITE_URL=https://riftden.com .
 FROM node:22-bookworm-slim AS build
 WORKDIR /app

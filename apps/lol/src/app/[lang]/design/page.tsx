@@ -17,7 +17,7 @@ import styles from './page.module.css';
 // внутренняя страница дизайн-системы — только на русском и не для поисковиков
 export const metadata: Metadata = {
   title: 'Дизайн-система',
-  description: 'Дизайн-система Rift Codex «HUD»: цвета, шрифты, компоненты, движение и правила текстов.',
+  description: 'Дизайн-система RiftDen «HUD»: цвета, шрифты, компоненты, движение и правила текстов.',
   robots: { index: false },
 };
 
@@ -59,7 +59,7 @@ export default async function DesignPage({ params }: { params: Promise<{ lang: s
   return (
     <div className="container">
       <PageHead title="Дизайн-система">
-        Rift Codex устроен как интерфейс внутри матча. Каждый приём несёт игровой смысл: деления на полоске — сотни здоровья, клавиши — умения, синий —
+        RiftDen устроен как интерфейс внутри матча. Каждый приём несёт игровой смысл: деления на полоске — сотни здоровья, клавиши — умения, синий —
         союзник, красный — враг.
       </PageHead>
 
