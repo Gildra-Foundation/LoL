@@ -1,0 +1,87 @@
+.map {
+  display: grid;
+  grid-template-columns: minmax(140px, 200px) 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.map svg {
+  width: 100%;
+  height: auto;
+}
+
+.ground {
+  fill: #16211c;
+  stroke: var(--line);
+}
+
+.jungle {
+  fill: #1c2a22;
+}
+
+.jungleOn {
+  fill: rgba(76, 195, 94, 0.45);
+}
+
+.river {
+  stroke: #1d3a44;
+  stroke-width: 12;
+}
+
+.baseBlue {
+  fill: rgba(62, 155, 255, 0.35);
+}
+
+.baseRed {
+  fill: rgba(229, 72, 77, 0.35);
+}
+
+.lane {
+  fill: none;
+  stroke: #33423b;
+  stroke-width: 7;
+  stroke-linejoin: round;
+}
+
+.laneOn {
+  fill: none;
+  stroke: var(--bone);
+  stroke-width: 9;
+  stroke-linejoin: round;
+}
+
+.support {
+  fill: var(--ally);
+  stroke: var(--night);
+  stroke-width: 3;
+}
+
+.legend {
+  display: grid;
+  gap: 6px;
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legend span::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--line-2);
+}
+
+.legend .active {
+  color: var(--bone);
+  font-weight: 600;
+}
+
+.legend .active::before {
+  background: var(--bone);
+  border-color: var(--bone);
+}

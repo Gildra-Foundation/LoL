@@ -1,0 +1,784 @@
+.editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  align-items: start;
+  gap: 28px;
+  padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+.main {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ── шаги ── */
+.panel {
+  padding: 20px 22px 22px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-size: var(--fs-21);
+}
+
+/* номер шага — клавиша */
+.step {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-key);
+  background: var(--stone);
+  box-shadow:
+    inset 0 0 0 1px var(--line-2),
+    0 3px 0 #0b100e;
+  font-size: var(--fs-14);
+}
+
+.progress {
+  margin-left: auto;
+  color: var(--ash-2);
+  font-family: var(--font-text);
+  font-size: var(--fs-14);
+  font-weight: 400;
+}
+
+/* ── чемпион и линия ── */
+.champion {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.portrait,
+.portraitEmpty {
+  width: 72px;
+  height: 72px;
+  outline: 2px solid var(--ally);
+  outline-offset: 2px;
+}
+
+.portraitEmpty {
+  display: grid;
+  place-items: center;
+  background: #0d1311;
+  outline-color: var(--line-2);
+  color: var(--ash-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-32);
+}
+
+.championText {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+
+.championName {
+  font-family: var(--font-display);
+  font-size: var(--fs-24);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.championName a:hover {
+  color: var(--ally);
+}
+
+.championTitle {
+  margin-bottom: 6px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.lanes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.lanes button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-size: var(--fs-14);
+  transition:
+    color var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+
+.lanes button:hover {
+  background: var(--stone-2);
+  color: var(--bone);
+}
+
+.lanes button[aria-pressed='true'] {
+  background: #17242e;
+  box-shadow: inset 0 0 0 1px var(--ally);
+  color: var(--bone);
+}
+
+.lanes button[aria-pressed='true'] svg {
+  color: var(--ally);
+}
+
+/* основная линия чемпиона — зелёная точка */
+.mainLane {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--health);
+}
+
+/* ── заклинания ── */
+.spells {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 28px;
+}
+
+.spellSlots {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 10px;
+}
+
+.spellSlot,
+.slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: #0d1311;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--ash-2);
+  transition: box-shadow var(--t-fast) var(--ease);
+}
+
+.spellSlot {
+  width: 56px;
+  height: 56px;
+}
+
+.spellSlot img,
+.slot img {
+  width: 100%;
+  height: 100%;
+}
+
+.spellSlot[aria-pressed='true'],
+.slot[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--ally);
+}
+
+.slotKey {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.spellList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spellList button {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  width: 76px;
+  color: var(--ash);
+  font-size: 11px;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+.spellList img {
+  width: 40px;
+  height: 40px;
+  outline: 1px solid rgba(0, 0, 0, 0.6);
+  outline-offset: -1px;
+}
+
+.spellList button:hover {
+  color: var(--bone);
+}
+
+.spellList button[aria-pressed='true'] {
+  color: var(--bone);
+}
+
+.spellList button[aria-pressed='true'] img {
+  outline: 2px solid var(--ally);
+  outline-offset: 1px;
+}
+
+.spellInfo {
+  min-height: 3em;
+  margin-top: 16px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+  line-height: 1.55;
+}
+
+.spellInfo b {
+  color: var(--bone);
+}
+
+/* ── предметы ── */
+.itemRows {
+  display: grid;
+  gap: 6px;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 14px;
+}
+
+.rowLabel {
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.slotWrap {
+  position: relative;
+}
+
+.slot {
+  width: 54px;
+  height: 54px;
+}
+
+.slotRemove {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  z-index: 2;
+  display: none;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--enemy);
+  color: var(--night);
+}
+
+.slotWrap:hover .slotRemove,
+.slot[aria-pressed='true'] + .slotRemove,
+.slotRemove:focus-visible {
+  display: grid;
+}
+
+.rowCost {
+  color: var(--gold);
+  font-size: var(--fs-16);
+}
+
+.slotHint {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.picker {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.pickerBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(100%, 240px);
+  height: 38px;
+  padding: 0 10px;
+  background: #0d1311;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash-2);
+}
+
+.search:focus-within {
+  box-shadow: inset 0 0 0 1px var(--ally);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: none;
+  outline: none;
+  color: var(--bone);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tabs button {
+  height: 34px;
+  padding: 0 10px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-size: var(--fs-12);
+}
+
+.tabs button:hover {
+  color: var(--bone);
+}
+
+.tabs button[aria-pressed='true'] {
+  background: #17242e;
+  box-shadow: inset 0 0 0 1px var(--ally);
+  color: var(--bone);
+}
+
+.pickerBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  align-items: start;
+  gap: 16px;
+}
+
+.pickerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  align-content: start;
+  gap: 10px 6px;
+  max-height: 380px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+
+.pickerGrid button {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  width: 100%;
+  color: var(--gold);
+  font-size: 11px;
+}
+
+.pickerGrid img {
+  display: block;
+  width: 100%;
+  max-width: 52px;
+  height: auto;
+  aspect-ratio: 1;
+  outline: 1px solid rgba(0, 0, 0, 0.6);
+  outline-offset: -1px;
+}
+
+.pickerGrid button:hover img,
+.pickerGrid button:focus-visible img {
+  outline: 2px solid var(--ally);
+  outline-offset: 1px;
+}
+
+.pickerGrid button:focus-visible {
+  outline: none;
+}
+
+.pickerInfo {
+  min-height: 220px;
+  padding: 14px;
+  background: #0d1311;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.none {
+  grid-column: 1 / -1;
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+/* ── итог ── */
+.summary {
+  position: sticky;
+  top: calc(var(--header-h) + 16px);
+  display: grid;
+  gap: 14px;
+  max-height: calc(100dvh - var(--header-h) - 32px);
+  padding: 18px;
+  overflow-y: auto;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+
+.nameField input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: #0d1311;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--bone);
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  outline: none;
+}
+
+.nameField input::placeholder {
+  color: var(--ash-2);
+}
+
+.nameField input:focus {
+  box-shadow: inset 0 0 0 1px var(--ally);
+}
+
+.preview {
+  padding: 12px;
+  background: #0d1311;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.previewTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.previewChamp,
+.previewChampEmpty {
+  width: 52px;
+  height: 52px;
+  outline: 2px solid var(--ally);
+  outline-offset: 2px;
+}
+
+.previewChampEmpty {
+  background: var(--night-2);
+  outline-color: var(--line-2);
+}
+
+.previewKeystone,
+.previewRuneEmpty {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+}
+
+.previewRuneEmpty {
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+
+.previewTree {
+  align-self: flex-end;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--tree);
+}
+
+.previewSpells {
+  display: grid;
+  gap: 4px;
+}
+
+.previewSpells img,
+.previewSpells span {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.previewSpells span {
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+
+.previewLane {
+  margin-left: auto;
+  color: var(--ally);
+}
+
+.previewItems {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.previewItems img,
+.previewItems span {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.previewItems span {
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.statsHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.statsHead h3 {
+  font-size: var(--fs-16);
+}
+
+.stats {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.stats tr {
+  border-bottom: 1px solid var(--line);
+}
+
+.stats th {
+  padding: 6px 0;
+  color: var(--ash);
+  font-family: var(--font-text);
+  font-size: var(--fs-14);
+  font-weight: 400;
+  text-align: left;
+}
+
+.stats th svg {
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--c);
+  vertical-align: -3px;
+}
+
+.stats td {
+  padding: 6px 0 6px 8px;
+  color: var(--bone);
+  font-size: var(--fs-16);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.unit {
+  margin-left: 1px;
+  font-family: var(--font-text);
+  font-size: var(--fs-14);
+}
+
+/* бонус — основным шрифтом: знак процента в Tektur похож на дробь */
+.stats .bonus {
+  width: 72px;
+  color: var(--health);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+
+.cost {
+  display: flex;
+  gap: 28px;
+  margin: 0;
+}
+
+.cost dt {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.cost dd {
+  margin: 2px 0 0;
+  color: var(--gold);
+  font-size: var(--fs-21);
+  font-weight: 700;
+}
+
+.warnings {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.warnings li {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr);
+  gap: 8px;
+  color: var(--ash);
+  font-size: var(--fs-12);
+  line-height: 1.45;
+}
+
+.warnings svg {
+  margin-top: 1px;
+  color: var(--warn);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.danger {
+  color: var(--enemy);
+}
+
+.status {
+  min-height: 1.4em;
+  margin-top: -6px;
+  color: var(--health);
+  font-size: var(--fs-12);
+}
+
+.saved h3 {
+  margin-bottom: 8px;
+  font-size: var(--fs-16);
+}
+
+.saved ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.saved li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  align-items: center;
+  background: #0d1311;
+}
+
+.savedOpen {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px 5px 5px;
+  font-size: var(--fs-14);
+  text-align: left;
+}
+
+.savedOpen img,
+.savedOpen > span:first-child {
+  width: 28px;
+  height: 28px;
+}
+
+.savedOpen > span:nth-child(2) {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.savedOpen small {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.savedOpen:hover {
+  background: var(--stone);
+}
+
+.savedRemove {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--ash-2);
+}
+
+.savedRemove:hover {
+  color: var(--enemy);
+}
+
+@media (max-width: 1100px) {
+  .editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summary {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .panel {
+    padding: 16px 14px;
+  }
+
+  .pickerBody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pickerInfo {
+    display: none;
+  }
+
+  .itemRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .rowLabel {
+    grid-column: 1 / -1;
+  }
+
+  .slot {
+    width: 46px;
+    height: 46px;
+  }
+}

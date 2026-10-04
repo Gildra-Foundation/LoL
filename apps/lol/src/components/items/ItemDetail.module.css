@@ -1,0 +1,246 @@
+.detail {
+  display: grid;
+  gap: 18px;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.head img {
+  width: 64px;
+  height: 64px;
+  outline: 1px solid var(--line-2);
+  outline-offset: 2px;
+}
+
+.category {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.name {
+  font-size: var(--fs-24);
+  line-height: 1.1;
+}
+
+.plain {
+  margin-top: 4px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.prices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  margin: 0;
+  padding: 12px 0;
+  border-block: 1px solid var(--line);
+}
+
+.prices dt {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.prices dd {
+  margin: 2px 0 0;
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+
+.prices div:first-child dd {
+  color: var(--gold);
+  font-size: var(--fs-24);
+}
+
+.stats {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats li {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-14);
+}
+
+.stats svg {
+  color: var(--c);
+}
+
+.stats b {
+  color: var(--bone);
+  font-size: var(--fs-16);
+}
+
+/* эффекты: разметка из описаний Riot, только известные классы */
+.effects {
+  color: var(--ash);
+  font-size: var(--fs-14);
+  line-height: 1.6;
+}
+
+.effects :global(.passive),
+.effects :global(.active) {
+  color: var(--bone);
+  font-weight: 600;
+}
+
+.effects :global(.active) {
+  color: var(--ally);
+}
+
+.effects :global(.phys),
+.effects :global(.ad) {
+  color: var(--stat-ad);
+}
+
+.effects :global(.magic),
+.effects :global(.ap) {
+  color: var(--stat-ap);
+}
+
+.effects :global(.true) {
+  color: var(--bone);
+}
+
+.effects :global(.heal) {
+  color: var(--health);
+}
+
+.effects :global(.shield),
+.effects :global(.mana) {
+  color: var(--stat-haste);
+}
+
+.effects :global(.armor) {
+  color: var(--stat-armor);
+}
+
+.effects :global(.mr) {
+  color: var(--stat-mr);
+}
+
+.effects :global(.gold) {
+  color: var(--gold);
+}
+
+.effects :global(.em),
+.effects :global(.key),
+.effects :global(.speed) {
+  color: var(--bone);
+}
+
+.effects :global(.rules) {
+  display: block;
+  margin-top: 6px;
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+  font-style: italic;
+}
+
+.section h3 {
+  margin-bottom: 10px;
+  color: var(--ash);
+  font-family: var(--font-text);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.recipe {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recipe .recipe {
+  margin: 6px 0 0 18px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+
+.recipe button {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 4px 8px 4px 4px;
+  background: #0d1311;
+  font-size: var(--fs-14);
+  text-align: left;
+  transition: background var(--t-fast) var(--ease);
+}
+
+.recipe button:hover {
+  background: var(--stone);
+}
+
+.recipe img {
+  width: 32px;
+  height: 32px;
+}
+
+.gold {
+  color: var(--gold);
+}
+
+.into {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.into img {
+  display: block;
+  width: 44px;
+  height: 44px;
+  outline: 1px solid rgba(0, 0, 0, 0.55);
+  outline-offset: -1px;
+  transition: outline-color var(--t-fast) var(--ease);
+}
+
+.into button:hover img {
+  outline: 2px solid var(--ally);
+  outline-offset: 1px;
+}
+
+.compact {
+  gap: 12px;
+}
+
+.compact .head img {
+  width: 48px;
+  height: 48px;
+}
+
+.compact .head {
+  grid-template-columns: 48px minmax(0, 1fr);
+}
+
+.compact .name {
+  font-size: var(--fs-18);
+}
+
+.compact .head {
+  align-items: start;
+}
+
+.compact .plain {
+  font-size: var(--fs-12);
+}

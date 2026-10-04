@@ -1,0 +1,352 @@
+.view {
+  display: grid;
+  gap: 20px;
+}
+
+/* ── дуэль ── */
+.duel {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.side {
+  position: relative;
+  min-height: 340px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0b100e;
+}
+
+.side[data-side='blue'] {
+  --side: var(--ally);
+  box-shadow: inset 0 -3px 0 var(--ally);
+}
+
+.side[data-side='red'] {
+  --side: var(--enemy);
+  box-shadow: inset 0 -3px 0 var(--enemy);
+}
+
+.splash {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
+.side::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, rgba(14, 20, 18, 0.97) 10%, rgba(14, 20, 18, 0.55) 55%, rgba(14, 20, 18, 0.1));
+}
+
+.sideBody {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  padding: 24px;
+}
+
+.side[data-side='red'] .sideBody {
+  justify-items: end;
+  text-align: right;
+}
+
+.sideLabel {
+  color: var(--side);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.side[data-side='red'] .who {
+  flex-direction: row-reverse;
+}
+
+.portrait {
+  width: 72px;
+  height: 72px;
+  box-shadow:
+    0 0 0 1px #050807,
+    0 0 0 3px var(--side);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: clamp(var(--fs-32), 4vw, var(--fs-44));
+  font-weight: 800;
+  font-variation-settings: 'wdth' 85;
+  line-height: 1;
+}
+
+.name:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+.title {
+  margin-top: 4px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.sideBody > [role='meter'] {
+  width: 100%;
+}
+
+.vs {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  padding: 6px 12px;
+  background: var(--night);
+  box-shadow: 0 0 0 1px var(--line-2);
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+/* ── выбор чемпиона ── */
+/* ── уровень ── */
+.level {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) 1fr;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 20px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.level p {
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+/* ── строки ── */
+.rows {
+  display: grid;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) 210px minmax(0, 1fr) 84px;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.val {
+  color: var(--ash);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  text-align: right;
+}
+
+.valB {
+  text-align: left;
+}
+
+.winA {
+  color: var(--ally) !important;
+}
+
+.winB {
+  color: var(--enemy) !important;
+}
+
+.val.winA,
+.val.winB {
+  font-size: var(--fs-21);
+}
+
+.track {
+  position: relative;
+  height: 10px;
+  background: #0a0f0d;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.track i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transition: width var(--t-slow) var(--ease);
+}
+
+.trackA i {
+  right: 0;
+  background: var(--ally);
+}
+
+.trackB i {
+  left: 0;
+  background: var(--enemy);
+}
+
+.label {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  font-size: var(--fs-14);
+  font-weight: 500;
+  text-align: center;
+}
+
+.label svg {
+  color: var(--ash-2);
+}
+
+.label small {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+  font-weight: 500;
+}
+
+/* ── дополнительно ── */
+.extras {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 20px 22px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.card h2 {
+  font-size: var(--fs-24);
+}
+
+.muted {
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend span::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+}
+
+.lgA::before {
+  background: var(--ally);
+}
+
+.lgB::before {
+  background: var(--enemy);
+}
+
+.profile {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-14);
+}
+
+.profile th,
+.profile td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.profile th[scope='row'] {
+  color: var(--ash-2);
+  font-family: var(--font-text);
+  font-weight: 400;
+  width: 28%;
+}
+
+.thA,
+.thB {
+  font-size: var(--fs-18);
+}
+
+.thA {
+  color: var(--ally);
+}
+
+.thB {
+  color: var(--enemy);
+}
+
+@media (max-width: 860px) {
+  .duel {
+    grid-template-columns: 1fr;
+  }
+
+  .vs {
+    top: 50%;
+  }
+
+  .side[data-side='red'] .sideBody {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .side[data-side='red'] .who {
+    flex-direction: row;
+  }
+
+  .level {
+    grid-template-columns: 1fr;
+  }
+
+  .row {
+    grid-template-columns: 56px minmax(0, 1fr) 104px minmax(0, 1fr) 56px;
+    gap: 6px;
+  }
+
+  .val {
+    font-size: var(--fs-14) !important;
+  }
+
+  .label {
+    font-size: var(--fs-12);
+  }
+
+  .label small {
+    display: none;
+  }
+
+  .extras {
+    grid-template-columns: 1fr;
+  }
+}

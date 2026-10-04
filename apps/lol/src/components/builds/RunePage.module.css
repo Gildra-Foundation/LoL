@@ -1,0 +1,221 @@
+.page {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 28px;
+}
+
+.column {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 14px;
+  padding: 16px 12px 18px;
+  background: #0d1311;
+  box-shadow: inset 0 2px 0 var(--tree), inset 0 0 0 1px var(--line);
+}
+
+.label {
+  justify-self: start;
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.trees {
+  display: flex;
+  gap: 6px;
+}
+
+.trees button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: box-shadow var(--t-fast) var(--ease);
+}
+
+.trees img {
+  width: 28px;
+  height: 28px;
+  filter: grayscale(1) brightness(0.8);
+  transition: filter var(--t-fast) var(--ease);
+}
+
+.trees button:hover img,
+.trees button[aria-pressed='true'] img {
+  filter: none;
+}
+
+.trees button[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px var(--tree);
+}
+
+.treeName {
+  color: var(--tree);
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+
+.keystones,
+.row,
+.shards {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.keystones {
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* невыбранные руны — серые и тусклые, как в клиенте */
+.keystone,
+.rune,
+.shards button {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  transition:
+    box-shadow var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+
+.keystone img,
+.rune img,
+.shards img {
+  filter: grayscale(1) brightness(0.7);
+  opacity: 0.6;
+  transition:
+    filter var(--t-fast) var(--ease),
+    opacity var(--t-fast) var(--ease);
+}
+
+.keystone {
+  width: 62px;
+  height: 62px;
+}
+
+.keystone img {
+  width: 58px;
+  height: 58px;
+}
+
+.rune {
+  width: 44px;
+  height: 44px;
+  background: var(--night-2);
+}
+
+.rune img {
+  width: 34px;
+  height: 34px;
+}
+
+.keystone:hover img,
+.rune:hover img,
+.shards button:hover img {
+  filter: none;
+  opacity: 0.85;
+}
+
+.keystone[aria-pressed='true'] img,
+.rune[aria-pressed='true'] img,
+.shards button[aria-pressed='true'] img {
+  filter: none;
+  opacity: 1;
+}
+
+.rune[aria-pressed='true'],
+.keystone[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--tree);
+}
+
+.keystone:focus-visible,
+.rune:focus-visible,
+.shards button:focus-visible,
+.trees button:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 2px;
+}
+
+.shards {
+  position: relative;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.shards button {
+  width: 30px;
+  height: 30px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.shards img {
+  width: 20px;
+  height: 20px;
+}
+
+.shards button[aria-pressed='true'] {
+  background: #1d2a26;
+  box-shadow: inset 0 0 0 1px var(--bone);
+}
+
+.shardLabel {
+  position: absolute;
+  left: 4px;
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.empty {
+  max-width: 30ch;
+  padding: 24px 0;
+  color: var(--ash);
+  font-size: var(--fs-14);
+  text-align: center;
+}
+
+.info {
+  grid-column: 1 / -1;
+  min-height: 84px;
+  padding: 12px 16px;
+  background: var(--night-2);
+  box-shadow: inset 2px 0 0 var(--tree, var(--line-2));
+}
+
+.infoName {
+  color: var(--tree, var(--bone));
+  font-family: var(--font-display);
+  font-size: var(--fs-16);
+  font-weight: 700;
+}
+
+.infoText,
+.infoEmpty {
+  margin-top: 4px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+  line-height: 1.55;
+}
+
+.infoText :global(.em),
+.infoText :global(.key) {
+  color: var(--bone);
+}
+
+@media (max-width: 760px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shardLabel {
+    display: none;
+  }
+}

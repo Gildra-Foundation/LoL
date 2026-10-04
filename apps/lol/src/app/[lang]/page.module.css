@@ -1,0 +1,424 @@
+.block {
+  padding-top: clamp(56px, 8vw, 96px);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.head h2 {
+  font-size: clamp(var(--fs-32), 4vw, var(--fs-44));
+}
+
+.more {
+  color: var(--ally);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.more:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ссылка на всю карточку: заголовок остаётся ссылкой, а нажать можно в любом месте */
+.stretched::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.stretched {
+  transition: color var(--t-fast) var(--ease);
+}
+
+.stretched:hover {
+  color: var(--ally);
+}
+
+.stretched:focus-visible {
+  outline: none;
+}
+
+.stretched:focus-visible::after {
+  outline: 2px solid var(--bone);
+  outline-offset: -4px;
+}
+
+/* ── входы в разделы: у каждого своё живое превью ── */
+.sections {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: clamp(40px, 6vw, 64px);
+}
+
+.sectionInner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 22px 24px;
+}
+
+.sectionInner h2 {
+  font-size: var(--fs-24);
+}
+
+.sectionInner > p {
+  margin: 6px 0 20px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.caption {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.board {
+  display: grid;
+  gap: 6px;
+}
+
+.board ol {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.board li {
+  display: grid;
+  grid-template-columns: 18px 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 4px 6px;
+  background: #0d1311;
+  font-size: var(--fs-14);
+}
+
+.board li > b:first-child {
+  color: var(--ash);
+  text-align: center;
+}
+
+.board li:first-child > b:first-child {
+  color: var(--gold);
+}
+
+.board img {
+  width: 30px;
+  height: 30px;
+}
+
+.board li > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.board li > b:last-child {
+  font-size: var(--fs-16);
+}
+
+.duel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
+}
+
+.duel .caption {
+  grid-column: 1 / -1;
+}
+
+.side {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  grid-template-areas:
+    'img name'
+    'img value'
+    'bar bar';
+  align-items: center;
+  gap: 0 10px;
+}
+
+.side img {
+  grid-area: img;
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 0 0 2px var(--ally);
+}
+
+.side > span {
+  grid-area: name;
+  overflow: hidden;
+  font-size: var(--fs-14);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.side > b {
+  grid-area: value;
+  font-size: var(--fs-18);
+}
+
+.side > [role='meter'] {
+  grid-area: bar;
+  margin-top: 10px;
+}
+
+.side[data-side='enemy'] {
+  grid-template-columns: minmax(0, 1fr) 36px;
+  grid-template-areas:
+    'name img'
+    'value img'
+    'bar bar';
+  text-align: right;
+}
+
+.side[data-side='enemy'] img {
+  box-shadow: 0 0 0 2px var(--enemy);
+}
+
+/* ── игры: дуэль и угадайка ── */
+.tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.tool {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+}
+
+.toolText > p {
+  margin-top: 6px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.versus {
+  display: grid;
+  grid-template-columns: repeat(2, 96px);
+  justify-items: center;
+  gap: 8px;
+}
+
+.versus img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  object-position: 50% 25%;
+  box-shadow: 0 0 0 2px var(--ally);
+}
+
+.versus img[data-side='enemy'] {
+  box-shadow: 0 0 0 2px var(--enemy);
+}
+
+.vs {
+  grid-column: 1 / -1;
+  color: var(--ash);
+  font-size: var(--fs-12);
+}
+
+/* строка догадки как в игре: совпало, частично, мимо */
+.cells {
+  display: grid;
+  grid-template-columns: repeat(7, 22px);
+  gap: 4px;
+}
+
+.cells i {
+  --v: var(--enemy);
+  height: 22px;
+  background: color-mix(in srgb, var(--v) 28%, var(--night-2));
+  box-shadow: inset 0 0 0 1px var(--v);
+}
+
+.cells i[data-verdict='match'] {
+  --v: var(--health);
+}
+
+.cells i[data-verdict='partial'] {
+  --v: var(--res-energy);
+}
+
+/* ── Рунтерра: полоса карты, при наведении камера чуть приближается ── */
+.worldFrame {
+  margin-top: 16px;
+}
+
+.world {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 240px;
+  padding: 28px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.worldMap {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 55% 50%;
+  transition: transform 1100ms var(--ease-in-out);
+}
+
+.world::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(14, 20, 18, 0.94) 0%, rgba(14, 20, 18, 0.7) 38%, rgba(14, 20, 18, 0) 75%);
+}
+
+.worldFrame:hover .worldMap {
+  transform: scale(1.06);
+}
+
+.worldText {
+  max-width: 46ch;
+}
+
+.worldText h2 {
+  font-size: var(--fs-32);
+}
+
+.worldText p {
+  margin-top: 8px;
+  color: var(--bone);
+  font-size: var(--fs-16);
+}
+
+.worldText .worldMeta {
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+/* ── рекорды: значение крупно, арт чемпиона справа ── */
+.records {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.record {
+  height: 100%;
+}
+
+.recordInner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 210px;
+  padding: 20px 22px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.recordInner img {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: -1;
+  width: 66%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%);
+  mask-image: linear-gradient(90deg, transparent, #000 60%);
+  filter: saturate(0.85) brightness(0.6);
+  transition:
+    filter var(--t-base) var(--ease),
+    transform var(--t-slow) var(--ease);
+}
+
+.record:hover img {
+  filter: saturate(1) brightness(0.78);
+  transform: scale(1.03);
+}
+
+.recordInner h3 {
+  max-width: 19ch;
+  color: var(--ash);
+  font-family: var(--font-text);
+  font-size: var(--fs-14);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.value {
+  margin-top: auto;
+  padding-top: 18px;
+  font-size: var(--fs-44);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.who {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.who a {
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+
+.who span {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.articles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 960px) {
+  .sections,
+  .tools {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .records {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .articles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .records,
+  .tool {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

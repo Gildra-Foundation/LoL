@@ -1,0 +1,124 @@
+.chart {
+  display: grid;
+  gap: 10px;
+}
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 22px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.lvl {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--bone);
+}
+
+.readout b {
+  margin-left: 4px;
+  font-size: var(--fs-18);
+}
+
+.own b {
+  color: var(--health);
+}
+
+.avg b {
+  color: var(--ally);
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+.grid {
+  stroke: rgba(233, 228, 214, 0.07);
+}
+
+.axis {
+  fill: var(--ash-2);
+  font-family: var(--font-display);
+  font-size: 12px;
+}
+
+.band {
+  fill: rgba(233, 228, 214, 0.06);
+}
+
+.average {
+  fill: none;
+  stroke: var(--ally);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+}
+
+.line {
+  fill: none;
+  stroke: var(--health);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.marker {
+  stroke: rgba(233, 228, 214, 0.35);
+  stroke-dasharray: 2 4;
+}
+
+.dot {
+  fill: var(--night);
+  stroke: var(--health);
+  stroke-width: 3;
+}
+
+.avgDot {
+  fill: var(--night);
+  stroke: var(--ally);
+  stroke-width: 2;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lgLine::before,
+.lgAvg::before,
+.lgBand::before {
+  content: '';
+  width: 22px;
+  height: 3px;
+}
+
+.lgLine::before {
+  background: var(--health);
+}
+
+.lgAvg::before {
+  background: repeating-linear-gradient(90deg, var(--ally) 0 6px, transparent 6px 10px);
+}
+
+.lgBand::before {
+  height: 12px;
+  background: rgba(233, 228, 214, 0.12);
+}
+
+.hint {
+  margin-left: auto;
+  color: var(--ash-2);
+}

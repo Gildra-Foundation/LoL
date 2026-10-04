@@ -1,0 +1,32 @@
+.wrap {
+  padding: clamp(80px, 16vh, 160px) 0 40px;
+}
+
+.code {
+  color: var(--enemy);
+  font-family: var(--font-display);
+  font-size: var(--fs-21);
+  font-weight: 700;
+}
+
+.wrap h1 {
+  margin-top: 8px;
+  font-size: clamp(var(--fs-44), 7vw, var(--fs-84));
+  font-weight: 800;
+  font-variation-settings: 'wdth' 85;
+  line-height: 0.95;
+}
+
+.text {
+  max-width: 56ch;
+  margin-top: 18px;
+  color: var(--ash);
+  font-size: var(--fs-18);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}

@@ -1,0 +1,27 @@
+# riftden.com на сервере: сайт и nginx с сертификатом Cloudflare Origin.
+# Порты 80/443 на сервере занимает nginx Gildra, поэтому Cloudflare ходит сюда на 8443 (правило Origin Rules в зоне riftden.com).
+# Запуск — deploy/deploy.sh на сервере.
+name: riftden
+
+services:
+  web:
+    image: riftden-web:latest
+    container_name: riftden-web
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_SITE_URL: https://riftden.com
+    expose:
+      - '3000'
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: riftden-nginx
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - '8443:443'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # сертификат Cloudflare Origin — только на сервере, в репозиторий не попадает
+      - /opt/riftden/certs:/etc/nginx/certs:ro

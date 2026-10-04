@@ -1,0 +1,102 @@
+.slot {
+  --s: 48px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: var(--ash);
+}
+
+.sm {
+  --s: 34px;
+  gap: 10px;
+}
+
+.lg {
+  --s: 68px;
+}
+
+.icon {
+  position: relative;
+  display: block;
+  width: var(--s);
+  height: var(--s);
+  background: #000;
+  box-shadow:
+    0 0 0 1px #050807,
+    0 0 0 2px var(--line-2);
+  transition: box-shadow var(--t-fast) var(--ease);
+}
+
+.icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.75) brightness(0.82);
+  transition: filter var(--t-fast) var(--ease);
+}
+
+.slot:hover .icon img,
+.slot[aria-pressed='true'] .icon img {
+  filter: none;
+}
+
+.slot:hover .icon {
+  box-shadow:
+    0 0 0 1px #050807,
+    0 0 0 2px var(--ash);
+}
+
+.slot[aria-pressed='true'] .icon {
+  box-shadow:
+    0 0 0 1px #050807,
+    0 0 0 3px var(--ally);
+}
+
+.slot:focus-visible {
+  outline: none;
+}
+
+.slot:focus-visible .icon {
+  box-shadow:
+    0 0 0 1px #050807,
+    0 0 0 3px var(--bone);
+}
+
+/* тёмный сектор перезарядки уходит по часовой стрелке */
+.sweep {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(transparent 0 var(--cd), rgba(5, 8, 7, 0.78) var(--cd) 360deg);
+  animation: cooldown 620ms linear both;
+  pointer-events: none;
+}
+
+@keyframes cooldown {
+  from {
+    --cd: 0deg;
+  }
+  to {
+    --cd: 360deg;
+  }
+}
+
+.key {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--s) - 9px);
+  translate: -50% 0;
+}
+
+.name {
+  max-width: 11ch;
+  color: var(--ash);
+  font-size: var(--fs-12);
+  line-height: 1.25;
+  text-align: center;
+}
+
+.slot[aria-pressed='true'] .name {
+  color: var(--bone);
+}

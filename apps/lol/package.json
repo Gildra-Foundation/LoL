@@ -1,0 +1,25 @@
+{
+  "name": "@rift/lol",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Rift Codex — справочник по чемпионам League of Legends",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "check": "tsc --noEmit",
+    "update-data": "node scripts/fetch-data.mjs && node scripts/fetch-items.mjs && node scripts/fetch-regions.mjs",
+    "check-articles": "node scripts/check-articles.mjs"
+  },
+  "dependencies": {
+    "@mdx-js/mdx": "^3.1.1",
+    "@rift/engine": "*",
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remark-gfm": "^4.0.1",
+    "server-only": "^0.0.1",
+    "yaml": "^2.9.1"
+  }
+}

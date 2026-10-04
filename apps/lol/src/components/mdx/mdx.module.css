@@ -1,0 +1,190 @@
+/* ── врезка ── */
+.callout {
+  --c: var(--ally);
+  margin: 32px 0;
+  padding: 18px 22px;
+  background: color-mix(in srgb, var(--c) 8%, var(--night-2));
+  box-shadow:
+    inset 3px 0 0 var(--c),
+    inset 0 0 0 1px color-mix(in srgb, var(--c) 30%, transparent);
+}
+
+.tip {
+  --c: var(--health);
+}
+
+.info {
+  --c: var(--ally);
+}
+
+.warning {
+  --c: var(--enemy);
+}
+
+.calloutTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px !important;
+  color: var(--c) !important;
+  font-family: var(--font-display);
+  font-size: var(--fs-18) !important;
+  font-weight: 700;
+}
+
+.calloutBody > :last-child {
+  margin-bottom: 0 !important;
+}
+
+/* ── чемпион в тексте ── */
+.champ {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px 0 2px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--bone) !important;
+  font-weight: 600;
+  text-decoration: none !important;
+  line-height: 1.6;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.champ img {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin: 2px 0;
+}
+
+.champ:hover {
+  box-shadow: inset 0 0 0 1px var(--ally);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  margin: 24px 0 32px;
+}
+
+/* ── формула ── */
+.formula {
+  margin: 28px 0;
+  padding: 20px 22px;
+  background: #0d1311;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+
+.expr {
+  color: var(--bone);
+  font-family: var(--font-display);
+  font-size: clamp(var(--fs-18), 2.2vw, var(--fs-24));
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.expr p {
+  margin: 0 !important;
+  color: inherit !important;
+  font: inherit !important;
+}
+
+.formula figcaption {
+  margin-top: 10px;
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+/* ── живой рейтинг ── */
+.leaders {
+  margin: 28px 0 32px;
+  padding: 16px 20px 10px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.leaders figcaption {
+  color: var(--ash);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.leaders ol {
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.leaders li {
+  display: grid;
+  grid-template-columns: 20px minmax(130px, 1fr) minmax(60px, 1.6fr) 72px;
+  align-items: center;
+  gap: 14px;
+  margin: 0 !important;
+  padding: 7px 0 !important;
+  border-top: 1px solid var(--line);
+}
+
+.leaders li::before {
+  display: none !important;
+}
+
+.leaders li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: var(--bone) !important;
+  font-weight: 600;
+  text-decoration: none !important;
+}
+
+.leaders li img {
+  width: 30px;
+  height: 30px;
+  margin: 0 !important;
+}
+
+.pos,
+.first {
+  font-family: var(--font-display);
+  text-align: center;
+  color: var(--ash-2);
+}
+
+.first {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.bar {
+  position: relative;
+  height: 6px;
+  background: #0a0f0d;
+}
+
+.bar i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--accent);
+}
+
+.value {
+  font-weight: 700;
+  text-align: right;
+}
+
+@media (max-width: 560px) {
+  .leaders li {
+    grid-template-columns: 18px minmax(0, 1fr) 64px;
+  }
+
+  .bar {
+    display: none;
+  }
+}

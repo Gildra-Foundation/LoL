@@ -1,0 +1,570 @@
+.root {
+  padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+/* ── арена: портреты по краям, часы и управление в центре ── */
+.arena {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px minmax(0, 1fr);
+  align-items: center;
+  gap: 28px;
+  padding: 28px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.fighter {
+  display: grid;
+  grid-template-columns: 196px minmax(0, 1fr);
+  align-items: end;
+  gap: 20px;
+  min-width: 0;
+}
+
+.fighter[data-side='blue'] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.fighter[data-side='red'] {
+  grid-column: 3;
+  grid-row: 1;
+  grid-template-columns: minmax(0, 1fr) 196px;
+  text-align: right;
+}
+
+.fighter[data-side='red'] .portrait {
+  order: 2;
+}
+
+.portrait {
+  position: relative;
+  aspect-ratio: 308 / 560;
+  overflow: hidden;
+  background: #0b100e;
+}
+
+.portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 700ms var(--ease);
+}
+
+.portrait::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 2px var(--side);
+  pointer-events: none;
+}
+
+.fighter[data-dead] .portrait img {
+  filter: grayscale(1) brightness(0.42);
+}
+
+/* цифры урона всплывают над целью — тёплый оранжевый, как физический урон в игре */
+.popup {
+  position: absolute;
+  top: 32%;
+  z-index: 2;
+  color: #ffb35c;
+  font-family: var(--font-display);
+  font-size: var(--fs-32);
+  font-weight: 800;
+  line-height: 1;
+  text-shadow:
+    0 2px 0 #000,
+    0 0 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  animation: popup 900ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes popup {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.7);
+  }
+  14% {
+    opacity: 1;
+    transform: translate(-50%, -6px) scale(1.18);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -76px) scale(1);
+  }
+}
+
+.banner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  padding: 48px 0 16px;
+  background: linear-gradient(0deg, rgba(5, 8, 7, 0.92), rgba(5, 8, 7, 0));
+  font-family: var(--font-display);
+  font-size: var(--fs-24);
+  font-weight: 800;
+  text-align: center;
+  animation: banner 520ms var(--ease) both;
+}
+
+.banner[data-kind='win'] {
+  color: var(--gold);
+}
+
+.banner[data-kind='loss'] {
+  color: var(--ash);
+}
+
+@keyframes banner {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.fighterInfo {
+  min-width: 0;
+  padding-bottom: 6px;
+}
+
+.sideName {
+  color: var(--side);
+  font-size: var(--fs-12);
+  font-weight: 600;
+}
+
+.fighterInfo h2 {
+  margin-top: 4px;
+  font-size: clamp(var(--fs-24), 2.6vw, var(--fs-44));
+  font-variation-settings: 'wdth' 85;
+  line-height: 1;
+}
+
+.fighterInfo h2 a:hover {
+  color: var(--side);
+}
+
+.title {
+  margin-top: 6px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+/* ── полоска здоровья: светлый след урона догоняет полоску с задержкой ── */
+.bar {
+  position: relative;
+  height: 22px;
+  margin-top: 18px;
+  overflow: hidden;
+  background: #0a0f0d;
+  border: 1px solid #050807;
+}
+
+.trail,
+.fill,
+.ticks {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.trail {
+  width: var(--hp);
+  background: #f1e3bd;
+  transition: width 420ms var(--ease) 260ms;
+}
+
+.fill {
+  width: var(--hp);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0 34%, rgba(0, 0, 0, 0) 34% 100%),
+    var(--side);
+  transition: width 90ms linear;
+}
+
+.ticks {
+  width: 100%;
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 calc(var(--major) - 2px), rgba(5, 8, 7, 0.9) calc(var(--major) - 2px) var(--major)),
+    repeating-linear-gradient(90deg, transparent 0 calc(var(--tick) - 1px), rgba(5, 8, 7, 0.55) calc(var(--tick) - 1px) var(--tick));
+}
+
+.bar[data-reverse] .trail,
+.bar[data-reverse] .fill {
+  right: 0;
+  left: auto;
+}
+
+.bar[data-reverse] .ticks {
+  transform: scaleX(-1);
+}
+
+.caption {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 1px 0 #000,
+    0 0 3px #000;
+}
+
+/* замах: полоска до следующего удара */
+.swing {
+  height: 3px;
+  margin-top: 6px;
+  background: #0a0f0d;
+}
+
+.swing span {
+  display: block;
+  height: 100%;
+  background: var(--bone);
+  opacity: 0.75;
+}
+
+.fighter[data-side='red'] .swing span {
+  margin-left: auto;
+}
+
+.swingNote {
+  margin: 6px 0 14px;
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+/* ── центр ── */
+.center {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.clock {
+  font-family: var(--font-display);
+  font-size: var(--fs-44);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.clock span {
+  font-size: var(--fs-60);
+}
+
+.clockNote {
+  margin-top: -8px;
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.speeds {
+  display: flex;
+  gap: 2px;
+}
+
+.speeds button {
+  min-width: 44px;
+  height: 32px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-family: var(--font-display);
+  font-size: var(--fs-14);
+  font-weight: 700;
+}
+
+.speeds button:hover {
+  color: var(--bone);
+}
+
+.speeds button[aria-pressed='true'] {
+  background: #17242e;
+  box-shadow: inset 0 0 0 1px var(--ally);
+  color: var(--bone);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+  cursor: pointer;
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--ally);
+}
+
+.swap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.swap:hover {
+  color: var(--bone);
+}
+
+/* ── итог ── */
+.verdict {
+  min-height: 60px;
+  margin-top: 12px;
+  padding: 16px 20px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: var(--fs-18);
+}
+
+.verdict b {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.waiting {
+  color: var(--ash);
+}
+
+/* ── цифры и матчапы ── */
+.details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 40px;
+  margin-top: 48px;
+}
+
+.details h2 {
+  margin-bottom: 16px;
+  font-size: var(--fs-24);
+}
+
+.numbers table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.numbers th,
+.numbers td {
+  padding: 10px 0 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+}
+
+.numbers thead th {
+  font-size: var(--fs-16);
+}
+
+.numbers th[data-side='blue'] {
+  color: var(--ally);
+}
+
+.numbers th[data-side='red'] {
+  color: var(--enemy);
+}
+
+.numbers th[scope='row'] {
+  padding-left: 0;
+  color: var(--ash);
+  font-family: var(--font-text);
+  font-size: var(--fs-14);
+  font-weight: 400;
+  text-align: left;
+}
+
+.numbers td {
+  width: 27%;
+  color: var(--ash-2);
+  font-size: var(--fs-18);
+}
+
+.numbers td[data-better] {
+  color: var(--bone);
+}
+
+/* знак процента в Tektur похож на дробь — пишем его основным шрифтом */
+.unit {
+  margin-left: 1px;
+  font-family: var(--font-text);
+  font-size: var(--fs-16);
+}
+
+.score {
+  color: var(--ash);
+  font-size: var(--fs-18);
+}
+
+.score b {
+  color: var(--bone);
+  font-size: var(--fs-32);
+}
+
+.scoreBar {
+  height: 8px;
+  margin: 10px 0 22px;
+  background: color-mix(in srgb, var(--enemy) 40%, #0a0f0d);
+}
+
+.scoreBar span {
+  display: block;
+  height: 100%;
+  background: var(--ally);
+}
+
+.lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.list h3 {
+  margin-bottom: 8px;
+  font-size: var(--fs-16);
+}
+
+.list[data-kind='win'] h3 {
+  color: var(--health);
+}
+
+.list[data-kind='loss'] h3 {
+  color: var(--enemy);
+}
+
+.list ol {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list button {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-areas:
+    'img name'
+    'img note';
+  align-items: center;
+  column-gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  background: #0d1311;
+  text-align: left;
+  transition: background var(--t-fast) var(--ease);
+}
+
+.list button:hover {
+  background: var(--stone);
+}
+
+.list img {
+  grid-area: img;
+  width: 34px;
+  height: 34px;
+}
+
+.list span {
+  grid-area: name;
+  overflow: hidden;
+  font-size: var(--fs-14);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.list small {
+  grid-area: note;
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.none {
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+.listNote {
+  margin-top: 12px;
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.disclaimer {
+  max-width: 80ch;
+  margin-top: 36px;
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+@media (max-width: 1180px) {
+  .arena {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fighter[data-side='red'] {
+    grid-column: 2;
+  }
+
+  .center {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    flex-flow: row wrap;
+    justify-content: center;
+    gap: 12px 20px;
+  }
+
+  .clockNote {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 960px) {
+  .details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .arena {
+    gap: 16px 12px;
+    padding: 12px;
+  }
+
+  .fighter,
+  .fighter[data-side='red'] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .fighter[data-side='red'] .portrait {
+    order: 0;
+  }
+
+  .popup {
+    font-size: var(--fs-24);
+  }
+
+  .clock span {
+    font-size: var(--fs-44);
+  }
+
+  .lists {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

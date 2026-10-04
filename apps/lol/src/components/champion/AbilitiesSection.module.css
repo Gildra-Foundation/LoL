@@ -1,0 +1,161 @@
+.section {
+  display: grid;
+  gap: 26px;
+}
+
+.head h2 {
+  font-size: clamp(var(--fs-32), 4vw, var(--fs-44));
+}
+
+.head p {
+  margin-top: 10px;
+  color: var(--ash);
+}
+
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 28px;
+}
+
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.play {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(10, 15, 13, 0.82);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--bone);
+  transition: box-shadow var(--t-fast) var(--ease);
+}
+
+.play:hover {
+  box-shadow: inset 0 0 0 1px var(--ally);
+}
+
+.noVideo {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  aspect-ratio: 16 / 9;
+  padding: 24px;
+  background: #0b100e;
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+  text-align: center;
+}
+
+.noVideo img {
+  width: 96px;
+  height: 96px;
+  box-shadow: 0 0 0 2px var(--line-2);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 26px;
+}
+
+.kind {
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+.text h3 {
+  font-size: var(--fs-32);
+}
+
+.description {
+  color: var(--ash);
+  white-space: pre-line;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: start;
+  gap: 14px 32px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.meta dt {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.meta dd {
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.cooldown {
+  grid-column: 1 / -1;
+}
+
+.ranks {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranks li {
+  display: grid;
+  justify-items: center;
+  min-width: 44px;
+  padding: 4px 6px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.rankNo {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.ranks .num {
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .panel {
+    grid-template-columns: 1fr;
+  }
+
+  .text {
+    padding: 20px 16px;
+  }
+
+  .slots {
+    gap: 18px 14px;
+  }
+}

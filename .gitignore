@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# не публикуем: убранные статьи, старая версия на Astro, локальные настройки Claude Code
+archive/
+_astro-old/
+.claude/
+
+# сайт по Genshin ведётся отдельно и подключает движок так же — подмодулем core
+apps/genshin/

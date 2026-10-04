@@ -1,0 +1,430 @@
+/* Левая колонка начинается от края контейнера, сцена — до правого края окна. */
+.select {
+  display: grid;
+  grid-template-columns: 420px minmax(0, 1fr);
+  min-height: calc(100dvh - var(--header-h));
+  padding-left: max(var(--gutter), calc((100% - var(--container)) / 2));
+  border-bottom: 1px solid var(--line);
+}
+
+/* ── левая колонка: поиск, линии, сетка ── */
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  max-height: calc(100dvh - var(--header-h));
+  padding: 28px 24px 0 0;
+  border-right: 1px solid var(--line);
+}
+
+.intro h1 {
+  font-size: var(--fs-32);
+}
+
+.intro p {
+  margin-top: 4px;
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+.search {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 12px;
+  background: #0d1311;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash-2);
+}
+
+.search:focus-within {
+  box-shadow: inset 0 0 0 1px var(--ally);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: none;
+  outline: none;
+  color: var(--bone);
+}
+
+.search input::placeholder {
+  color: var(--ash-2);
+}
+
+/* фильтр по линии — как в клиенте: значок и подпись */
+.lanes {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.lanes button {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  height: 52px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-size: var(--fs-12);
+  line-height: 1;
+  transition:
+    color var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+
+.lanes button:hover {
+  background: var(--stone-2);
+  color: var(--bone);
+}
+
+.lanes button[aria-pressed='true'] {
+  background: #17242e;
+  box-shadow: inset 0 0 0 1px var(--ally);
+  color: var(--bone);
+}
+
+.lanes button[aria-pressed='true'] svg {
+  color: var(--ally);
+}
+
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  align-content: start;
+  gap: 14px 8px;
+  padding: 4px 4px 20px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+
+.cell {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ash);
+  text-align: center;
+}
+
+.portrait {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  background: #0b100e;
+}
+
+.portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.85) brightness(0.86);
+  transition: filter var(--t-fast) var(--ease);
+}
+
+.portrait::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.label {
+  overflow: hidden;
+  font-size: var(--fs-12);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.cell:hover .portrait img,
+.cell[aria-selected='true'] .portrait img {
+  filter: none;
+}
+
+.cell:hover .label,
+.cell[aria-selected='true'] .label {
+  color: var(--bone);
+}
+
+.cell[aria-selected='true'] .portrait::after {
+  box-shadow:
+    inset 0 0 0 2px var(--ally),
+    inset 0 0 0 3px #0b100e;
+}
+
+.cell:focus-visible {
+  outline: none;
+}
+
+.cell:focus-visible .portrait {
+  outline: 2px solid var(--bone);
+  outline-offset: 2px;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  padding: 20px 0;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+/* подсказка по клавишам — строка состояния внизу колонки */
+.keys {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 12px 0 16px;
+  border-top: 1px solid var(--line);
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.keys span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.keys kbd:last-of-type {
+  margin-right: 2px;
+}
+
+/* ── сцена ── */
+.stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 560px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #0b100e;
+}
+
+.splash,
+.splashPrev {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
+.splash {
+  animation: reveal 380ms var(--ease) both;
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+}
+
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(0deg, rgba(14, 20, 18, 0.97) 0%, rgba(14, 20, 18, 0.78) 34%, rgba(14, 20, 18, 0) 66%),
+    linear-gradient(90deg, rgba(14, 20, 18, 0.72), rgba(14, 20, 18, 0) 52%);
+}
+
+.info {
+  width: min(100%, 640px);
+  padding: 0 48px 40px;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  color: var(--ash);
+  font-size: var(--fs-14);
+  list-style: none;
+}
+
+.meta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta svg {
+  color: var(--cls, var(--ash-2));
+}
+
+.name {
+  margin-top: 10px;
+  font-size: clamp(3rem, 6.4vw, 5.75rem);
+  font-weight: 800;
+  font-variation-settings: 'wdth' 82;
+  line-height: 0.9;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+  margin-top: 8px;
+  font-size: var(--fs-21);
+}
+
+.abilities {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  margin-top: 24px;
+  padding-bottom: 10px;
+}
+
+.slots {
+  display: flex;
+  gap: 12px;
+}
+
+.abilityName {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: var(--fs-16);
+  font-weight: 500;
+}
+
+.abilityName span {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+  font-weight: 400;
+}
+
+.hp {
+  display: grid;
+  gap: 8px;
+  max-width: 500px;
+  margin-top: 22px;
+}
+
+.hpHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 16px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.hpHead > span:first-child {
+  color: var(--bone);
+  font-weight: 500;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.legend > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.legend b {
+  color: var(--bone);
+  font-size: var(--fs-16);
+  font-weight: 700;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  align-self: center;
+  background: var(--health);
+}
+
+.swatchGrowth {
+  background: color-mix(in srgb, var(--health) 36%, #0a0f0d);
+}
+
+.quick {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: start;
+  gap: 4px 28px;
+  margin-top: 20px;
+}
+
+.quick dt {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.quick dd {
+  font-size: var(--fs-21);
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+@media (max-width: 960px) {
+  .select {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    padding-left: 0;
+  }
+
+  .picker {
+    order: 2;
+    max-height: none;
+    padding: 24px var(--gutter) 0;
+    border-right: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .grid {
+    max-height: 460px;
+  }
+
+  .keys {
+    display: none;
+  }
+
+  .stage {
+    order: 1;
+    min-height: 0;
+  }
+
+  /* сверху остаётся место для арта */
+  .info {
+    padding: 220px var(--gutter) 28px;
+  }
+
+  .quick {
+    grid-template-columns: repeat(2, auto);
+  }
+}

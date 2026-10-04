@@ -1,0 +1,282 @@
+.section {
+  display: grid;
+  gap: 18px;
+}
+
+.head h2 {
+  font-size: clamp(var(--fs-32), 4vw, var(--fs-44));
+}
+
+.head p {
+  max-width: 70ch;
+  margin-top: 10px;
+  color: var(--ash);
+}
+
+.sub {
+  margin-top: 18px;
+  font-size: var(--fs-21);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.sheet {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-14);
+}
+
+.sheet thead th {
+  padding: 0 14px 10px;
+  border-bottom: 1px solid var(--line-2);
+  color: var(--ash-2);
+  font-family: var(--font-text);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sheet tbody tr {
+  border-bottom: 1px solid var(--line);
+}
+
+.sheet tbody tr:hover {
+  background: rgba(233, 228, 214, 0.025);
+}
+
+.sheet th[scope='row'] {
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sheet th[scope='row'] svg {
+  display: inline-block;
+  vertical-align: -3px;
+  margin-right: 10px;
+  color: var(--accent);
+}
+
+.sheet td {
+  padding: 12px 14px;
+  vertical-align: middle;
+}
+
+.value {
+  font-size: var(--fs-24);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.flash {
+  display: inline-block;
+  animation: flash 600ms var(--ease);
+}
+
+@keyframes flash {
+  from {
+    color: var(--health);
+  }
+}
+
+.base {
+  color: var(--ash);
+  white-space: nowrap;
+}
+
+.rank {
+  color: var(--ash);
+  white-space: nowrap;
+}
+
+.rank b {
+  font-size: var(--fs-18);
+}
+
+.podium {
+  color: var(--gold);
+}
+
+.high {
+  color: var(--bone);
+}
+
+.low {
+  color: var(--ash-2);
+}
+
+.na {
+  color: var(--ash-2);
+}
+
+.compare {
+  min-width: 240px;
+}
+
+.cmp {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.meter {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  background: #0a0f0d;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.meterFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--accent);
+  transition: width var(--t-slow) var(--ease);
+}
+
+.meterAvg {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ally);
+  transition: left var(--t-slow) var(--ease);
+}
+
+.up,
+.down,
+.even {
+  min-width: 9ch;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.up {
+  color: var(--health);
+}
+
+.down {
+  color: var(--enemy);
+}
+
+.even {
+  color: var(--ash);
+}
+
+/* ── график ── */
+.growth {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+  padding: 22px 24px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.growthHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.growthHead h3 {
+  font-size: var(--fs-24);
+}
+
+.switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.switch button {
+  height: 32px;
+  padding: 0 12px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-size: var(--fs-14);
+  transition:
+    color var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+}
+
+.switch button:hover {
+  color: var(--bone);
+}
+
+.switch button[aria-pressed='true'] {
+  color: var(--bone);
+  box-shadow: inset 0 0 0 1px var(--health);
+  background: #1c2c22;
+}
+
+/* ── узкие экраны: строки таблицы превращаются в карточки ── */
+@media (max-width: 760px) {
+  .sheet thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .sheet tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'name value'
+      'base rank'
+      'cmp cmp';
+    gap: 4px 12px;
+    padding: 12px 0;
+  }
+
+  .sheet th[scope='row'] {
+    grid-area: name;
+    padding: 0;
+  }
+
+  .value {
+    grid-area: value;
+    padding: 0 !important;
+    text-align: right;
+  }
+
+  .base {
+    grid-area: base;
+    padding: 0 !important;
+    font-size: var(--fs-12);
+  }
+
+  .rank {
+    grid-area: rank;
+    padding: 0 !important;
+    text-align: right;
+  }
+
+  .compare {
+    grid-area: cmp;
+    min-width: 0;
+    padding: 4px 0 0 !important;
+  }
+
+  .growth {
+    padding: 16px 12px;
+  }
+
+  .hint {
+    display: none;
+  }
+}

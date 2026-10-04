@@ -1,0 +1,911 @@
+.root {
+  padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+/* ── список регионов ── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.chips button {
+  height: 36px;
+  padding: 0 12px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-size: var(--fs-14);
+  transition:
+    color var(--t-fast) var(--ease),
+    background var(--t-fast) var(--ease);
+}
+
+.chips button span {
+  margin-left: 6px;
+  color: var(--ash-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-12);
+}
+
+.chips button:hover {
+  background: var(--stone-2);
+  color: var(--bone);
+}
+
+.chips button[aria-pressed='true'] {
+  background: #17242e;
+  box-shadow: inset 0 0 0 1px var(--ally);
+  color: var(--bone);
+}
+
+/* ── кадр карты ── */
+.stage {
+  position: relative;
+}
+
+.viewport {
+  position: relative;
+  aspect-ratio: 16 / 9.4;
+  overflow: hidden;
+  background: #0d1a20;
+  box-shadow: inset 0 0 0 1px var(--line);
+  user-select: none;
+}
+
+/* камера: слой с картой двигается и приближается, метки едут вместе с ним */
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 1;
+  transform-origin: 0 0;
+  transition: transform 1100ms var(--ease-in-out);
+  will-change: transform;
+}
+
+.layer img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* края кадра темнее — как в окне камеры */
+.viewport::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(5, 10, 12, 0.55));
+  pointer-events: none;
+}
+
+/* под открытой панелью справа карта притемнена */
+.viewport::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, transparent 40%, rgba(8, 12, 11, 0.8) 72%);
+  opacity: 0;
+  transition: opacity 600ms var(--ease);
+  pointer-events: none;
+}
+
+.stage[data-open] .viewport::before {
+  opacity: 1;
+}
+
+.markers {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.marker {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  translate: -7px -50%;
+  transition:
+    left 1100ms var(--ease-in-out),
+    top 1100ms var(--ease-in-out),
+    opacity var(--t-slow) var(--ease);
+}
+
+.pin {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bone);
+  box-shadow: 0 0 0 3px rgba(5, 8, 7, 0.6);
+  transition:
+    background var(--t-fast) var(--ease),
+    box-shadow var(--t-base) var(--ease);
+}
+
+.label {
+  color: var(--bone);
+  font-family: var(--font-display);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 10px rgba(0, 0, 0, 0.75);
+  transition: font-size var(--t-base) var(--ease);
+}
+
+.label small {
+  margin-left: 6px;
+  color: var(--ash);
+  font-size: var(--fs-12);
+}
+
+/* у правого края кадра подпись слева от метки */
+.marker[data-flip] {
+  flex-direction: row-reverse;
+  translate: calc(-100% + 7px) -50%;
+}
+
+.marker:hover .pin,
+.marker:focus-visible .pin {
+  background: var(--ally);
+}
+
+.marker:focus-visible {
+  outline: none;
+}
+
+.marker:focus-visible .label {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.marker[aria-pressed='true'] .pin {
+  background: var(--gold);
+  box-shadow:
+    0 0 0 3px rgba(5, 8, 7, 0.6),
+    0 0 0 7px color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+.marker[aria-pressed='true'] .label {
+  font-size: var(--fs-24);
+}
+
+.marker[data-dim] {
+  opacity: 0.35;
+}
+
+.marker[data-covered] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.markers[data-compact] .label {
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease);
+}
+
+.markers[data-compact] .marker:hover,
+.markers[data-compact] .marker:focus-visible,
+.markers[data-compact] .marker:hover .label,
+.markers[data-compact] .marker:focus-visible .label {
+  opacity: 1;
+}
+
+/* региона нет на картах — пунктирная метка */
+.marker[data-hidden-place] .pin {
+  background: transparent;
+  box-shadow: none;
+  outline: 2px dashed var(--bone);
+  outline-offset: -2px;
+}
+
+/* ── связи: дуги от региона к регионам знакомых чемпионов ── */
+.lines {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  /* камера летит 1100 мс — рисуем, когда она почти на месте */
+  --delay: 950ms;
+}
+
+.lines[data-instant],
+.tags[data-instant] {
+  --delay: 0ms;
+}
+
+.lines g {
+  transition: opacity var(--t-base) var(--ease);
+}
+
+.lines g[data-off] {
+  opacity: 0.07;
+}
+
+.track {
+  fill: none;
+  stroke: var(--gold);
+  stroke-opacity: 0.35;
+  stroke-dasharray: 100;
+  animation: draw 650ms var(--ease) var(--delay) both;
+}
+
+/* бегущие точки — от выбранного региона к связанным */
+.flow {
+  fill: none;
+  stroke: var(--gold);
+  stroke-linecap: round;
+  stroke-dasharray: 1.5 10;
+  animation:
+    fade-in 300ms linear calc(var(--delay) + 450ms) both,
+    flow 1s linear infinite;
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -11.5;
+  }
+}
+
+.tags {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  --delay: 950ms;
+  animation: fade-in 400ms var(--ease) calc(var(--delay) + 300ms) both;
+}
+
+.count {
+  position: absolute;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  translate: -50% -50%;
+  border-radius: 12px;
+  background: rgba(12, 18, 16, 0.92);
+  box-shadow: inset 0 0 0 1.5px var(--gold);
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: var(--fs-12);
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+  transition: opacity var(--t-base) var(--ease);
+}
+
+/* метка у края кадра: регион за кадром, стрелка показывает, куда он */
+.pointer {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px 0 6px;
+  background: rgba(12, 18, 16, 0.92);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--bone);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: auto;
+  transition:
+    opacity var(--t-base) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+}
+
+.pointer:hover {
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+.pointer[data-edge='left'] {
+  translate: 0 -50%;
+}
+
+.pointer[data-edge='right'] {
+  translate: -100% -50%;
+}
+
+.pointer[data-edge='top'] {
+  translate: -50% 0;
+}
+
+.pointer[data-edge='bottom'] {
+  translate: -50% -100%;
+}
+
+.pointer b {
+  color: var(--gold);
+  font-family: var(--font-display);
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
+
+.count[data-off],
+.pointer[data-off] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pointer img,
+.homeless img {
+  width: 22px;
+  height: 22px;
+}
+
+/* при наведении на чемпиона — портреты знакомых над регионом */
+.faces {
+  position: absolute;
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  translate: -50% calc(-100% - 14px);
+  background: rgba(12, 18, 16, 0.92);
+  box-shadow: inset 0 0 0 1.5px var(--gold);
+  animation: fade-in 180ms var(--ease) both;
+}
+
+.faces img {
+  width: 32px;
+  height: 32px;
+}
+
+.homeless {
+  position: absolute;
+  top: 64px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 4px 0 10px;
+  background: rgba(12, 18, 16, 0.92);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--ash);
+  font-size: var(--fs-12);
+  animation: fade-in 180ms var(--ease) both;
+}
+
+/* ── кнопки в кадре ── */
+.tools {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px 0 8px;
+  background: rgba(12, 18, 16, 0.86);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--bone);
+  font-size: var(--fs-14);
+}
+
+.tool:hover {
+  box-shadow: inset 0 0 0 1px var(--ally);
+}
+
+.tool[data-tour] {
+  padding-left: 10px;
+}
+
+.tool[data-tour] svg {
+  color: var(--gold);
+}
+
+/* ── путешествие ── */
+.tour {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 3;
+  width: min(460px, calc(100% - 32px));
+  padding: 12px 14px 8px;
+  background: rgba(12, 18, 16, 0.92);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  animation: fade-in 300ms var(--ease) both;
+}
+
+.stage[data-open] .tour {
+  max-width: calc(100% - min(44%, 540px) - 32px);
+}
+
+.tourTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tourTitle {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.tourTitle span {
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tourTitle b {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-21);
+  line-height: 1.1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tourCount {
+  color: var(--ash);
+  font-size: var(--fs-14);
+  white-space: nowrap;
+}
+
+.tourButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.tourButtons button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--bone);
+}
+
+.tourButtons button:hover {
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+/* остановки: пройденные залиты, текущая заполняется, пока камера стоит */
+.tourSteps {
+  display: flex;
+  gap: 3px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tourSteps li {
+  flex: 1;
+}
+
+.tourSteps button {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 14px;
+}
+
+.tourSteps button::before,
+.tourSteps button span {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: var(--line-2);
+}
+
+.tourSteps button:hover::before {
+  background: var(--ash-2);
+}
+
+.tourSteps button[data-done]::before,
+.tourSteps button span {
+  background: var(--gold);
+}
+
+.tourSteps button span {
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+.hint {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  z-index: 3;
+  max-width: 52ch;
+  color: var(--bone);
+  font-size: var(--fs-14);
+  text-shadow: 0 1px 2px #000;
+}
+
+/* ── панель региона ── */
+.panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  width: min(44%, 540px);
+  overflow-y: auto;
+  pointer-events: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+
+.card {
+  min-height: 100%;
+  /* непрозрачная — метки карты под панелью не просвечивают */
+  background: #0e1412;
+  box-shadow: inset 1px 0 0 var(--line-2);
+  pointer-events: auto;
+  animation: card 560ms var(--ease) 200ms both;
+}
+
+@keyframes card {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+.art {
+  position: relative;
+  aspect-ratio: 1920 / 888;
+  overflow: hidden;
+  background: #0b100e;
+}
+
+.art img,
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* видео проявляется поверх арта, когда начало играть */
+.video {
+  opacity: 0;
+  transition: opacity 700ms var(--ease);
+}
+
+.video[data-ready] {
+  opacity: 1;
+}
+
+.art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(14, 20, 18, 0.95), rgba(14, 20, 18, 0) 55%);
+}
+
+.body {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding: 0 24px 26px;
+}
+
+.body h2 {
+  font-size: clamp(var(--fs-32), 3.6vw, 3.25rem);
+  font-variation-settings: 'wdth' 85;
+  line-height: 0.95;
+}
+
+/* заголовок региона заходит на низ арта; у «Без родины» арта нет */
+.art + .body h2 {
+  margin-top: -34px;
+}
+
+.body:first-child {
+  padding-top: 26px;
+}
+
+.lead {
+  color: var(--bone);
+  font-size: var(--fs-16);
+  line-height: 1.6;
+}
+
+.body > p:not(.lead) {
+  color: var(--ash);
+  font-size: var(--fs-14);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+}
+
+.page {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 8px 0 14px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--bone);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.page:hover {
+  box-shadow: inset 0 0 0 1px var(--ally);
+}
+
+.more {
+  color: var(--ally);
+  font-size: var(--fs-14);
+}
+
+.more:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.ties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ties button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.ties button:hover,
+.ties button:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--gold);
+  color: var(--bone);
+}
+
+.ties b {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: var(--fs-12);
+}
+
+.tip {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+
+.champsTitle {
+  margin-top: 6px;
+  font-size: var(--fs-16);
+}
+
+.champsTitle span {
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+.champs {
+  display: grid;
+  /* 90 px — влезает самое длинное слово в именах (Хеймердингер) */
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 12px 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.champs a {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  color: var(--ash);
+  font-size: var(--fs-12);
+  text-align: center;
+}
+
+.face {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 56px;
+}
+
+.face img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  outline: 1px solid rgba(0, 0, 0, 0.6);
+  outline-offset: -1px;
+  transition: opacity var(--t-fast) var(--ease);
+}
+
+/* сколько у чемпиона связей по лору */
+.face b {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--night);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 70%, transparent);
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* имя из нескольких слов — в две строки, а не многоточием */
+.name {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  line-height: 1.25;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.champs a:hover,
+.champs a[data-focus] {
+  color: var(--bone);
+}
+
+.champs a:hover img,
+.champs a[data-focus] img {
+  outline: 2px solid var(--ally);
+  outline-offset: 1px;
+}
+
+/* наведён чемпион: его знакомые из этого же региона в золотой рамке, остальные тише */
+.champs[data-focus] a:not([data-focus], [data-known]) img {
+  opacity: 0.4;
+}
+
+.champs a[data-known] img {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.cycle {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.cycle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.cycle button:hover {
+  color: var(--bone);
+}
+
+@media (max-width: 999px) {
+  .viewport {
+    aspect-ratio: 1;
+  }
+
+  .stage[data-open] .viewport::before {
+    opacity: 0;
+  }
+
+  .panel {
+    position: static;
+    width: auto;
+    overflow: visible;
+  }
+
+  .card {
+    min-height: 0;
+    background: var(--night-2);
+    animation-delay: 0ms;
+  }
+
+  .label {
+    font-size: var(--fs-14);
+  }
+
+  .marker[aria-pressed='true'] .label {
+    font-size: var(--fs-18);
+  }
+
+  .hint,
+  .tip {
+    display: none;
+  }
+
+  .tour,
+  .stage[data-open] .tour {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin: 8px 0;
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+}
+
+@media (hover: none) {
+  .tip {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layer,
+  .marker {
+    transition: none;
+  }
+
+  .card {
+    animation: none;
+  }
+
+  .video {
+    display: none;
+  }
+}

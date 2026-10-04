@@ -1,0 +1,73 @@
+/*
+  Тема League of Legends — «HUD».
+  Сайт устроен как интерфейс внутри матча: каждый визуальный приём несёт игровой смысл.
+  Зелёный — здоровье и рост, синий — союзник, мана и выбор, красный — враг и потери.
+  Полное описание: /design и DESIGN.md. Общие стили — в @rift/engine/styles/base.css.
+*/
+
+:root {
+  color-scheme: dark;
+
+  /* ── Палитра: ночь Ущелья ── */
+  --night: #121a17; /* фон страницы */
+  --night-2: #18221e; /* приподнятые поверхности */
+  --stone: #222c28; /* панели HUD */
+  --stone-2: #2b3631; /* панели при наведении */
+  --line: #34403b; /* границы */
+  --line-2: #4a5852; /* выделенные границы */
+  --bone: #e9e4d6; /* основной текст */
+  --ash: #a9b3ac; /* второстепенный текст */
+  --ash-2: #7f8a85; /* подписи, третичный текст */
+
+  --health: #4cc35e;
+  --health-deep: #1f5a2a;
+  --ally: #3e9bff;
+  --ally-deep: #12345c;
+  --enemy: #e5484d;
+  --enemy-deep: #5a1a1d;
+  --gold: #e3b23c; /* только первое место и золото */
+
+  /* ресурсы — как полоски в игре */
+  --res-mana: #3e7bf0;
+  --res-energy: #e8c547;
+  --res-fury: #e5484d;
+  --res-other: #b9c2bd;
+
+  /* характеристики — цвета иконок из игры */
+  --stat-hp: var(--health);
+  --stat-ad: #e9883a;
+  --stat-as: #e6c84a;
+  --stat-armor: #d39b54;
+  --stat-mr: #9b7cf0;
+  --stat-ms: #d5dbd7;
+  --stat-range: #3dbfb0;
+  --stat-dps: #ef6a4c;
+  --stat-ap: #b98cf7;
+  --stat-haste: #7fd1f0;
+  --stat-crit: #ef6a4c;
+  --stat-pen: #e5484d;
+  --stat-vamp: #d0535b;
+  --stat-mana: var(--res-mana);
+
+  /* классы */
+  --cls-Fighter: #e9883a;
+  --cls-Tank: #8fb3c9;
+  --cls-Mage: #9b7cf0;
+  --cls-Assassin: #e5484d;
+  --cls-Support: #4cc35e;
+  --cls-Marksman: #e6c84a;
+
+  /* предупреждение и «частично» в угадайке */
+  --warn: #e8c547;
+
+  /* ── Шрифты: Tektur для имён и чисел, Geologica для текста ── */
+  --font-display: var(--font-tektur), 'Segoe UI', system-ui, sans-serif;
+  --font-text: var(--font-geologica), system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* угол перезарядки: тёмный сектор уходит по часовой стрелке, как на иконках умений в игре */
+@property --cd {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 360deg;
+}
