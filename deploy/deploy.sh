@@ -15,6 +15,6 @@ docker build --quiet -t "riftden-web:$TAG" -t riftden-web:latest --build-arg SIT
 
 docker compose -f deploy/compose.yml up -d --remove-orphans
 # старые сборки сайта — только свои образы, на сервере живут и другие проекты
-docker images riftden-web --format '{{.Tag}}' | grep -vxE "latest|$TAG" | xargs -r -I{} docker rmi -f "riftden-web:{}" >/dev/null
+docker images riftden-web --format '{{.Tag}}' | grep -vxE "latest|$TAG" | xargs -r -I{} docker rmi -f "riftden-web:{}" >/dev/null || true
 
 echo "riftden.com: выложен $TAG"
