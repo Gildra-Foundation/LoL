@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { useRouter } from 'next/navigation';
 import { useDeferredValue, useMemo, useRef, useState, ViewTransition } from 'react';
 import { AbilitySlot, type AbilityBrief } from '@/components/champion/AbilitySlot';
@@ -228,8 +230,8 @@ export function ChampionSelect({ champions, initialId, patch }: ChampionSelectPr
         </div>
 
         <div className={styles.stage}>
-          {previous && <img key={`prev-${previous.id}`} className={styles.splashPrev} src={img.centered(previous.id)} alt="" width={1280} height={720} />}
-          <img key={selected.id} className={styles.splash} src={img.centered(selected.id)} alt="" width={1280} height={720} />
+          {previous && <Image sizes="(max-width: 960px) 100vw, 66vw" key={`prev-${previous.id}`} className={styles.splashPrev} src={img.centered(previous.id)} alt="" width={1280} height={720} />}
+          <Image sizes="(max-width: 960px) 100vw, 66vw" loading="eager" key={selected.id} className={styles.splash} fetchPriority="high" decoding="async" src={img.centered(selected.id)} alt="" width={1280} height={720} />
 
           <div className={styles.info}>
             <ul className={styles.meta}>

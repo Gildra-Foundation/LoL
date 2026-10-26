@@ -5,11 +5,26 @@ name: riftden
 
 services:
   web:
-    image: riftden-web:latest
+    image: ${RIFTDEN_IMAGE:-riftden-web:latest}
     container_name: riftden-web
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_SITE_URL: https://riftden.com
+      # Публичные настройки трекера Plausible (lib/plausible.ts) для страниц, которые рендерятся на сервере.
+      PLAUSIBLE_SCRIPT_URL: https://riftden.com/stats/js/script.js
+      PLAUSIBLE_API_URL: /stats/api/event
+      PLAUSIBLE_SITE_DOMAIN: riftden.com
+    networks:
+      default: {}
+      content: {}
+    # Bounded writable cache while the host disk has no unreserved free space.
+    tmpfs:
+      - /app/apps/lol/.next/cache/images:size=134217728,uid=1000,gid=1000,mode=0755
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
     expose:
       - '3000'
 
@@ -21,7 +36,18 @@ services:
       - web
     ports:
       - '8443:443'
+    networks:
+      default: {}
+      content: {}
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       # сертификат Cloudflare Origin — только на сервере, в репозиторий не попадает
       - /opt/riftden/certs:/etc/nginx/certs:ro
+
+networks:
+  default: {}
+  # Общая сеть с Plausible (`plausible:8000`). Создаётся один раз:
+  # docker network create gildra_content
+  content:
+    name: gildra_content
+    external: true

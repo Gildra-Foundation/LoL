@@ -1,6 +1,5 @@
 import type { SearchIndex } from '@rift/engine/layout/SearchPalette';
 import { plural } from '@rift/engine/lib/format';
-import { getArticles } from '@/lib/articles';
 import { championHref, img } from '@/lib/assets';
 import { getChampions } from '@/lib/champions';
 import { defineMessages, langOf, localeParams } from '@/lib/i18n';
@@ -16,7 +15,6 @@ const MESSAGES = defineMessages({
     item: (category: string, gold: string) => `${category}, ${gold} золота`,
     regions: 'Регионы',
     region: (count: number) => `Регион Рунтерры, чемпионов: ${count}`,
-    articles: 'Статьи',
   },
   en: {
     champions: 'Champions',
@@ -24,7 +22,6 @@ const MESSAGES = defineMessages({
     item: (category: string, gold: string) => `${category}, ${gold} gold`,
     regions: 'Regions',
     region: (count: number) => `Runeterra region, ${count} ${plural(count, ['champion', 'champions', 'champions'], 'en')}`,
-    articles: 'Articles',
   },
 });
 
@@ -36,7 +33,6 @@ export const generateStaticParams = localeParams;
 export async function GET(_request: Request, { params }: { params: Promise<{ lang: string }> }) {
   const lang = await langOf(params);
   const t = MESSAGES[lang];
-  const articles = getArticles(lang);
   const index: SearchIndex = {
     groups: [
       {
@@ -55,9 +51,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ lan
         limit: 4,
         items: getRegionsInfo(lang).regions.map((r) => ({ href: `/runeterra/${r.slug}`, title: r.name, sub: t.region(r.champions.length), icon: r.image ?? undefined })),
       },
-      ...(articles.length > 0
-        ? [{ title: t.articles, limit: 4, items: articles.map((a) => ({ href: `/articles/${a.slug}`, title: a.title, sub: a.category, meta: a.category })) }]
-        : []),
     ],
   };
   return Response.json(index);

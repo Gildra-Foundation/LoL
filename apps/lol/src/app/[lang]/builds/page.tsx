@@ -1,11 +1,7 @@
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
 import { PageHead } from '@rift/engine/ui/PageHead';
-import { BuildEditor } from '@/components/builds/BuildEditor';
-import type { BuildChampion } from '@/lib/build';
-import { getChampions } from '@/lib/champions';
-import { alternates, defineMessages, langOf, LOCALE_TAG } from '@/lib/i18n';
-import { getItems, getRunes, getSpells } from '@/lib/shop';
+import { BuildLoader } from '@/components/builds/BuildLoader';
+import { alternates, defineMessages, langOf } from '@/lib/i18n';
 
 const MESSAGES = defineMessages({
   ru: {
@@ -29,26 +25,11 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 export default async function BuildsPage({ params }: { params: Promise<{ lang: string }> }) {
   const lang = await langOf(params);
   const t = MESSAGES[lang];
-  const data: BuildChampion[] = getChampions(lang)
-    .map((c) => ({
-      id: c.id,
-      slug: c.slug,
-      name: c.name,
-      title: c.title,
-      positions: c.positions,
-      damageType: c.tactical?.damageType ?? 'kPhysical',
-      partype: c.partype,
-      resource: c.resource,
-      stats: c.stats,
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name, LOCALE_TAG[lang]));
 
   return (
     <div className="container">
       <PageHead title={t.title}>{t.lead}</PageHead>
-      <Suspense fallback={<div style={{ minHeight: 720 }} />}>
-        <BuildEditor champions={data} items={getItems(lang)} runes={getRunes(lang)} spells={getSpells(lang)} />
-      </Suspense>
+      <BuildLoader />
     </div>
   );
 }

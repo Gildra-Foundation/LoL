@@ -6,3 +6,10 @@ archive
 _astro-old
 .claude
 apps/genshin
+
+**/data.previous
+**/data.stage-*
+**/data.update-lock
+artifacts
+test-results
+playwright-report

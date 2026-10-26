@@ -1,0 +1,6 @@
+[Unit]
+Description=RiftDen public availability check
+[Service]
+Type=oneshot
+ExecStart=/opt/riftden/app/deploy/check-health.sh
+Environment=PATH=/usr/local/bin:/usr/bin:/bin

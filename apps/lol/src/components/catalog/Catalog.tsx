@@ -131,6 +131,9 @@ export function Catalog({ champions, maxHp }: { champions: CatalogChampion[]; ma
   // смена фильтра — переход: карточки уходят, приходят и переставляются плавно
   const update = (changes: Record<string, string | null>) => {
     const next = new URLSearchParams(params.toString());
+    // Blur and a filter click can race; preserve the current text in either navigation.
+    if (query.trim()) next.set('q', query.trim());
+    else next.delete('q');
     for (const [k, v] of Object.entries(changes)) {
       if (v) next.set(k, v);
       else next.delete(k);

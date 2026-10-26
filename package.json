@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Справочники по играм на общем движке: packages/engine — движок, apps/* — сайты игр",
+  "description": "\u0421\u043f\u0440\u0430\u0432\u043e\u0447\u043d\u0438\u043a\u0438 \u043f\u043e \u0438\u0433\u0440\u0430\u043c \u043d\u0430 \u043e\u0431\u0449\u0435\u043c \u0434\u0432\u0438\u0436\u043a\u0435: packages/engine \u2014 \u0434\u0432\u0438\u0436\u043e\u043a, apps/* \u2014 \u0441\u0430\u0439\u0442\u044b \u0438\u0433\u0440",
   "workspaces": [
     "packages/*",
     "apps/*"
@@ -14,15 +14,36 @@
     "start": "npm run start -w @rift/lol",
     "check": "npm run check --workspaces --if-present",
     "update-data": "npm run update-data -w @rift/lol",
-    "check-articles": "npm run check-articles -w @rift/lol",
     "dev:genshin": "npm run dev -w @rift/genshin",
     "build:genshin": "npm run build -w @rift/genshin",
-    "update-data:genshin": "npm run update-data -w @rift/genshin"
+    "update-data:genshin": "npm run update-data -w @rift/genshin",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "check:architecture": "node scripts/check-architecture.mjs",
+    "check:data": "npm run check:data -w @rift/lol",
+    "verify": "npm run lint && npm run check && npm run check:architecture && npm run check:data && npm test",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.0",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "typescript": "~5.9"
+    "eslint": "^10.12.0",
+    "mdast-util-from-markdown": "2.1.0",
+    "mdast-util-gfm": "3.1.0",
+    "mdast-util-mdx": "3.0.0",
+    "micromark-extension-gfm": "3.0.0",
+    "micromark-extension-mdxjs": "3.0.0",
+    "typescript": "~5.9",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3",
+    "yaml": "2.9.1"
+  },
+  "engines": {
+    "node": ">=22.18 <23"
   }
 }

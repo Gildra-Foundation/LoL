@@ -1,0 +1,14 @@
+name: riftden-staging
+services:
+  web:
+    build:
+      context: ..
+      args:
+        SITE_URL: http://127.0.0.1:3016
+        PREVIEW: 'true'
+    image: riftden-staging:local
+    ports:
+      - '127.0.0.1:3016:3000'
+    tmpfs:
+      - /app/apps/lol/.next/cache/images:size=134217728,uid=1000,gid=1000,mode=0755
+    restart: unless-stopped

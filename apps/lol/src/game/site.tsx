@@ -1,4 +1,5 @@
 // Всё, чем сайт LoL отличается от сайта другой игры на том же движке: название, знак, меню, подвал, поиск — на каждом языке.
+import type { SiteDefinition } from '@rift/engine/site/types';
 import type { NavItem, NavLink } from '@rift/engine/layout/Header';
 import type { SearchEntry } from '@rift/engine/layout/SearchPalette';
 import { PATCH } from '@/lib/assets';
@@ -31,7 +32,6 @@ const TEXT = defineMessages({
     compare: 'Сравнение',
     duel: 'Дуэль',
     guess: 'Угадай чемпиона',
-    articles: 'Статьи',
     searchLabel: 'Найти чемпиона',
     badge: `Патч ${PATCH}`,
     mobileBadge: `Данные патча ${PATCH}`,
@@ -42,7 +42,6 @@ const TEXT = defineMessages({
       builds: ['Конструктор билдов', 'Руны, заклинания и предметы с расчётом характеристик'],
       stats: ['Рейтинги', 'Таблица характеристик на любом уровне'],
       compare: ['Сравнение', 'Два чемпиона на одной шкале'],
-      articles: ['Статьи', 'Механики, макро-игра, советы новичкам'],
     },
     placeholder: 'Чемпион, предмет или регион',
     emptyHint: 'Проверьте написание или поищите по классу.',
@@ -67,7 +66,6 @@ const TEXT = defineMessages({
     compare: 'Compare',
     duel: 'Duel',
     guess: 'Guess the champion',
-    articles: 'Articles',
     searchLabel: 'Find a champion',
     badge: `Patch ${PATCH}`,
     mobileBadge: `Patch ${PATCH} data`,
@@ -78,7 +76,6 @@ const TEXT = defineMessages({
       builds: ['Build editor', 'Runes, spells and items with stat calculations'],
       stats: ['Rankings', 'Stat table at any level'],
       compare: ['Compare', 'Two champions on one scale'],
-      articles: ['Articles', 'Mechanics, macro, tips for beginners'],
     },
     placeholder: 'Champion, item or region',
     emptyHint: 'Check the spelling or search by class.',
@@ -90,10 +87,9 @@ const TEXT = defineMessages({
   },
 });
 
-/** Меню, поиск и подвал на языке страницы. withArticles — показывать ли раздел статей (пока статей нет, он скрыт). */
-export function getSite(lang: Locale, { withArticles }: { withArticles: boolean }) {
+/** Меню, поиск и подвал на языке страницы. */
+export function getSite(lang: Locale): SiteDefinition {
   const t = TEXT[lang];
-  const articles = withArticles ? [{ href: '/articles', label: t.articles }] : [];
 
   const nav: NavItem[] = [
     { href: '/champions', label: t.champions },
@@ -110,7 +106,6 @@ export function getSite(lang: Locale, { withArticles }: { withArticles: boolean 
         { href: '/guess', label: t.guess },
       ],
     },
-    ...articles,
   ];
 
   const section = (href: string, [title, sub]: string[]): SearchEntry => ({ href, title, sub });
@@ -121,7 +116,6 @@ export function getSite(lang: Locale, { withArticles }: { withArticles: boolean 
     section('/builds', t.sections.builds),
     section('/stats', t.sections.stats),
     section('/compare', t.sections.compare),
-    ...(withArticles ? [section('/articles', t.sections.articles)] : []),
   ];
 
   const footerLinks: NavLink[] = [
@@ -134,7 +128,7 @@ export function getSite(lang: Locale, { withArticles }: { withArticles: boolean 
     { href: '/compare', label: t.compare },
     { href: '/duel', label: t.duel },
     { href: '/guess', label: t.guess },
-    ...articles,
+    { href: '/methodology', label: lang === 'ru' ? 'Данные и методика' : 'Data and methods' },
   ];
 
   const sources = (

@@ -419,13 +419,6 @@
   gap: 10px;
 }
 
-.articles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-}
-
 .pager {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -484,8 +477,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .chips,
-  .articles {
+  .chips {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -502,7 +494,6 @@
   .tips,
   .profile,
   .chips,
-  .articles,
   .pager {
     grid-template-columns: 1fr;
   }

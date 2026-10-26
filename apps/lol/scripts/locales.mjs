@@ -4,5 +4,9 @@ export const LOCALES = [
   { code: 'en', dd: 'en_US', cd: 'default', universe: 'en_us', site: 'en_US' },
 ];
 
-export const DATA = new URL('../src/data/', import.meta.url);
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+export const DATA = process.env.RIFTDEN_DATA_DIR
+  ? pathToFileURL(path.resolve(process.env.RIFTDEN_DATA_DIR) + path.sep)
+  : new URL('../src/data/', import.meta.url);
 export const dataDir = (code) => new URL(`${code}/`, DATA);

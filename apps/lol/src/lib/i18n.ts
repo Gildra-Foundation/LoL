@@ -15,7 +15,7 @@ export async function langOf(params: Promise<{ lang: string }>): Promise<Locale>
 export const localeParams = () => LOCALES.map((lang) => ({ lang }));
 
 /** Адрес сайта для канонических ссылок и Open Graph; на сервере задаётся переменной окружения. */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://riftden.com';
 
 /** Каноническая ссылка и версии страницы на других языках: path — без префикса языка. */
 export function alternates(lang: Locale, path: string): Metadata['alternates'] {

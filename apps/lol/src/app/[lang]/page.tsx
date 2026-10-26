@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
-import { ArticleCard } from '@rift/engine/articles/ArticleCard';
 import Link from '@rift/engine/i18n/Link';
 import { plural } from '@rift/engine/lib/format';
 import { ChampionSelect, type SelectChampion } from '@/components/home/ChampionSelect';
 import { LolTierPreview } from '@/components/home/LolTierPreview';
 import { Frame } from '@rift/engine/ui/Frame';
 import { ResourceBar } from '@rift/engine/ui/ResourceBar';
-import { getArticles } from '@/lib/articles';
 import { championHref, img, PATCH } from '@/lib/assets';
 import { difficultyLevel, getChampion, getChampions, leaders, newestChampions, similarChampions, statsOf } from '@/lib/champions';
 import { alternates, defineMessages, langOf } from '@/lib/i18n';
@@ -30,7 +28,7 @@ const MESSAGES = defineMessages({
       hp: 'Больше всего здоровья на 18 уровне',
       ehp_physical: 'Дольше всех живёт под физическим уроном',
       spellblock: 'Самое высокое сопротивление магии',
-      aa_dps: 'Самые сильные автоатаки без предметов',
+      aa_dps: 'Наибольший базовый DPS автоатак',
       attackrange: 'Самая большая дальность атаки',
       movespeed: 'Самый быстрый',
     },
@@ -54,15 +52,13 @@ const MESSAGES = defineMessages({
     patchRecords: (patch: string) => `Рекорды патча ${patch}`,
     allRankings: 'Все рейтинги',
     sameValue: (n: number) => `и ещё ${n} с тем же значением`,
-    articles: 'Статьи',
-    allArticles: 'Все статьи',
   },
   en: {
     records: {
       hp: 'Most health at level 18',
       ehp_physical: 'Survives longest against physical damage',
       spellblock: 'Highest magic resist',
-      aa_dps: 'Strongest basic attacks without items',
+      aa_dps: 'Highest base auto-attack DPS',
       attackrange: 'Longest attack range',
       movespeed: 'Fastest',
     },
@@ -86,8 +82,6 @@ const MESSAGES = defineMessages({
     patchRecords: (patch: string) => `Patch ${patch} records`,
     allRankings: 'All rankings',
     sameValue: (n: number) => `and ${n} more with the same value`,
-    articles: 'Articles',
-    allArticles: 'All articles',
   },
 });
 
@@ -138,10 +132,6 @@ export default async function Home({ params }: Props) {
     const ties = champions.filter((c) => Math.abs(statsOf(c, r.level)[r.key] - top.value) < 1e-6).length - 1;
     return { ...r, label: t.records[r.key], top, ties };
   });
-
-  const articles = getArticles(lang);
-  const lead = articles.find((a) => a.featured) ?? articles[0];
-  const more = articles.filter((a) => a !== lead).slice(0, 3);
 
   return (
     <>
@@ -282,23 +272,6 @@ export default async function Home({ params }: Props) {
             ))}
           </ul>
         </section>
-
-        {lead && (
-          <section className={styles.block}>
-            <div className={styles.head}>
-              <h2>{t.articles}</h2>
-              <Link href="/articles" className={styles.more}>
-                {t.allArticles}
-              </Link>
-            </div>
-            <ArticleCard article={lead} lead />
-            <div className={styles.articles}>
-              {more.map((a) => (
-                <ArticleCard key={a.slug} article={a} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
     </>
   );

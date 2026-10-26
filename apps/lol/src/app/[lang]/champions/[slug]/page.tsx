@@ -1,8 +1,10 @@
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import Link from '@rift/engine/i18n/Link';
 import { notFound } from 'next/navigation';
 import { ViewTransition } from 'react';
-import { ArticleCard } from '@rift/engine/articles/ArticleCard';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { breadcrumbData } from '@/lib/seo';
 import { AbilitiesSection, type AbilityFull } from '@/components/champion/AbilitiesSection';
 import { ChampionChip } from '@/components/champion/ChampionChip';
 import { ChampionProvider } from '@/components/champion/ChampionProvider';
@@ -15,7 +17,6 @@ import { Frame } from '@rift/engine/ui/Frame';
 import { Icon } from '@/components/Icon';
 import { Radar } from '@rift/engine/ui/Radar';
 import { Tag } from '@rift/engine/ui/Tag';
-import { getArticles } from '@/lib/articles';
 import { getLore, regionOf, relations } from '@/lib/lore';
 import { PATCH, abilityVideo, championHref, img } from '@/lib/assets';
 import {
@@ -88,7 +89,6 @@ const MESSAGES = defineMessages({
     regionMap: 'Связи региона на карте',
     similar: 'Похожие по цифрам',
     similarLead: 'Близкие базовые характеристики и рост, тот же класс и тип атаки.',
-    articles: (name: string) => `Статьи, где есть ${name}`,
     neighbors: 'Соседние чемпионы',
     prev: 'Предыдущий',
     next: 'Следующий',
@@ -146,7 +146,6 @@ const MESSAGES = defineMessages({
     regionMap: 'Region connections on the map',
     similar: 'Similar by the numbers',
     similarLead: 'Close base stats and growth, same class and attack type.',
-    articles: (name: string) => `Articles featuring ${name}`,
     neighbors: 'Previous and next champions',
     prev: 'Previous',
     next: 'Next',
@@ -276,9 +275,6 @@ export default async function ChampionPage({ params }: Params) {
     .map((k) => ({ champion: k, home: regionOf(k.id, lang) }))
     // сначала земляки, потом остальные по алфавиту
     .sort((a, b) => Number(a.home !== region) - Number(b.home !== region) || a.champion.name.localeCompare(b.champion.name, LOCALE_TAG[lang]));
-  const related = getArticles(lang)
-    .filter((a) => a.champions.includes(c.id) || a.cover.champion === c.id)
-    .slice(0, 3);
 
   const skinCount = c.skins.length - 1;
   const facts = [
@@ -307,10 +303,11 @@ export default async function ChampionPage({ params }: Params) {
       default="none"
     >
       <div>
+        <JsonLd data={breadcrumbData(lang, [{ name: t.champions, path: '/champions' }, { name: c.name, path: championHref(c.slug) }])} />
         <ChampionProvider>
           <section className={styles.hero}>
             <div className={styles.heroBg} aria-hidden="true">
-              <img src={img.centered(c.id)} alt="" width={1280} height={720} fetchPriority="high" />
+              <Image sizes="100vw" loading="eager" src={img.centered(c.id)} alt="" width={1280} height={720} fetchPriority="high" />
             </div>
             <div className={`container ${styles.heroContent}`}>
               <nav className={styles.crumbs} aria-label={t.crumbs}>
@@ -525,17 +522,6 @@ export default async function ChampionPage({ params }: Params) {
               ))}
             </div>
           </section>
-
-          {related.length > 0 && (
-            <section className={styles.block}>
-              <h2 className={styles.h2}>{t.articles(c.name)}</h2>
-              <div className={styles.articles}>
-                {related.map((a) => (
-                  <ArticleCard key={a.slug} article={a} />
-                ))}
-              </div>
-            </section>
-          )}
 
           <nav className={styles.pager} aria-label={t.neighbors}>
             <Link href={championHref(prev.slug)} transitionTypes={['nav-back']} className={styles.pagerLink}>

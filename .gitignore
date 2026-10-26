@@ -15,3 +15,10 @@ _astro-old/
 
 # сайт по Genshin ведётся отдельно и подключает движок так же — подмодулем core
 apps/genshin/
+
+playwright-report/
+test-results/
+artifacts/
+apps/lol/src/data.previous/
+apps/lol/src/data.stage-*/
+apps/lol/src/data.update-lock/

@@ -43,7 +43,7 @@ export interface DuelResult {
 const MAX_TIME = 180;
 
 /** Броня снижает физический урон в 100 / (100 + броня) раз — как в игре. */
-export const afterArmor = (damage: number, armor: number) => damage * (100 / (100 + armor));
+export const afterArmor = (damage: number, armor: number) => damage * (armor >= 0 ? 100 / (100 + armor) : 2 - 100 / (100 - armor));
 
 export function simulateDuel(a: BaseStats, b: BaseStats, level: number, useRange = true): DuelResult {
   const s = [statsAtLevel(a, level), statsAtLevel(b, level)];

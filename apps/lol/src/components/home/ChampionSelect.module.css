@@ -258,6 +258,9 @@
   gap: 6px 16px;
   margin: 0;
   padding: 0;
+  width: fit-content;
+  padding: 4px 8px;
+  background: rgb(14 20 18 / 85%);
   color: var(--ash);
   font-size: var(--fs-14);
   list-style: none;
