@@ -37,7 +37,7 @@ npm run check     # проверка типов движка и сайта
 
 ## Выкладка
 
-Сайт работает на сервере в Docker: контейнер `riftden-web` (сборка по `Dockerfile`) и `riftden-nginx` с сертификатом Cloudflare Origin. Порты 80/443 на сервере заняты другим проектом, поэтому Cloudflare ходит на сервер по порту 8443 (правило Origin Rules в зоне riftden.com). Файлы — в `deploy/`:
+Сайт работает на сервере в Docker: контейнер `riftden-web` (сборка по `Dockerfile`) и `riftden-nginx` с сертификатом Cloudflare Origin. Порты 80/443 на сервере заняты другим проектом, поэтому Cloudflare ходит на сервер по порту 8080 (правило Origin Rules в зоне riftden.com; на 8443 Cloudflare не кэширует). Файлы — в `deploy/`:
 
 - `deploy/deploy.sh` — на сервере: проверки текущего checkout, сборка кандидата, переключение и откат;
 - `deploy/compose.yml`, `deploy/nginx.conf` — контейнеры и nginx;

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cloudflare для riftden.com: сертификат Origin, DNS, строгий SSL и правило «ходить на сервер по порту 8443».
+"""Cloudflare для riftden.com: сертификат Origin, DNS, строгий SSL и правило «ходить на сервер по порту 8080» (на 8443 и других портах из списка Cloudflare кэш отключён).
 
 Ключ API берётся из env-файла на сервере и никуда не выводится.
 Запуск на сервере: sudo python3 cloudflare.py --env <env-файл с ключом> --ip <IPv4 сервера> [--cert] [--dns]
@@ -15,7 +15,7 @@ import urllib.request
 API = "https://api.cloudflare.com/client/v4"
 ZONE = "riftden.com"
 HOSTS = ["riftden.com", "www.riftden.com"]
-ORIGIN_PORT = 8443
+ORIGIN_PORT = 8080
 CERT_DIR = "/opt/riftden/certs"
 
 

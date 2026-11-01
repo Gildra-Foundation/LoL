@@ -15,13 +15,13 @@
 Сайт — **riftden.com**, домен на Cloudflare. Сервер общий с другим проектом: его nginx занимает порты 80/443, поэтому у сайта свой контур, который чужой стек не трогает.
 
 ```
-браузер ──HTTPS──▶ Cloudflare (SSL strict) ──HTTPS :8443──▶ riftden-nginx (сертификат Cloudflare Origin)
+браузер ──HTTPS──▶ Cloudflare (SSL strict) ──HTTPS :8080──▶ riftden-nginx (сертификат Cloudflare Origin)
                                                                └──▶ riftden-web (next start, :3000)
 ```
 
 - **Код** — репозитории [Gildra-Foundation/LoL](https://github.com/Gildra-Foundation/LoL) (сайт) и [Gildra-Foundation/core](https://github.com/Gildra-Foundation/core) (движок, подмодуль `packages/engine`).
 - **Сборка и запуск** — `deploy/deploy.sh` на сервере: свежий код из GitHub, образ по `Dockerfile`, перезапуск контейнеров из `deploy/compose.yml`.
-- **Cloudflare** — `deploy/cloudflare.py`: сертификат Origin, A-запись и www, SSL strict, «всегда HTTPS» и правило Origin Rules «ходить на сервер по порту 8443». Ключ API хранится только на сервере.
+- **Cloudflare** — `deploy/cloudflare.py`: сертификат Origin, A-запись и www, SSL strict, «всегда HTTPS» и правило Origin Rules «ходить на сервер по порту 8080». Ключ API хранится только на сервере.
 - **Адрес сайта** для канонических ссылок и sitemap задаётся при сборке: `SITE_URL=https://riftden.com`.
 
 ### Дальше
