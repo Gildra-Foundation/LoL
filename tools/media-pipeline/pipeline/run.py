@@ -261,11 +261,16 @@ def build(args):
     log("bytes", json.dumps(sizes))
     if champ_failures and not args.allow_failures:
         raise SystemExit(f"{len(champ_failures)} champions failed; rerun to resume (see report.json)")
+    # one file per skin: the site loads only the record it shows
+    for sid, entry in manifest["skins"].items():
+        _write_json(os.path.join(out, "skins", f"{sid}.json"), entry)
     _write_json(os.path.join(out, "manifest.json"), manifest)
     if not (args.skins or args.champions):
         if os.path.isdir(final_dir):
             shutil.rmtree(final_dir)
         os.rename(out, final_dir)
+        # last step: the finished patch becomes current
+        _write_json(os.path.join(args.out, "current.json"), {"patch": patch, "base": f"/media/{patch}/"})
         log(f"done: {final_dir}")
         return final_dir
     log(f"partial build (filtered) kept in {out}")

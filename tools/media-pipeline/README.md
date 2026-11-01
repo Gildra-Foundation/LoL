@@ -24,9 +24,11 @@
 
 ```
 /opt/riftden/media/
+  current.json               ← {"patch":"16.21","base":"/media/16.21/"}: последний полностью готовый патч (пишется последним, атомарно)
   SITE_PATCH                 ← пишет выкатка сайта: патч, который сайт сейчас использует
   16.21/
-    manifest.json            ← главный файл для update-data
+    manifest.json            ← все скины (для update-data)
+    skins/<skinId>.json      ← запись одного скина = manifest.skins[<skinId>] (для страницы скина)
     report.json              ← время, счётчики, размеры, список провалов
     images/{splash,uncentered}/<skinId>.webp + .avif
     images/{tile,loading,vintage}/<skinId>.webp
