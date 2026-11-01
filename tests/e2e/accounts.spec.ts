@@ -89,12 +89,23 @@ test('sign up, confirm email, sign in and keep favorites', async ({ page }) => {
   expect(await add('skin', '103086')).toBe(200);
   expect((await page.request.post('/api/favorites', { data: { kind: 'skin', ref: '1' }, headers: { origin: 'https://evil.example' } })).status()).toBe(403);
 
+  // список образов в формате каталога (/[lang]/skins-index.json): название, чемпион, картинка с CommunityDragon
+  await page.route('**/skins-index.json', (route) =>
+    route.fulfill({
+      json: [{ id: 103086, slug: 'immortalized-legend-ahri', name: 'Бессмертная легенда Ари', champion: 'Ahri', championName: 'Ари', tile: 'assets/characters/ahri/skins/skin86/images/ahri_splash_tile_86.jpg', rarity: 'kLegendary' }],
+    }),
+  );
+  await page.route('https://raw.communitydragon.org/**', (route) => route.fulfill({ status: 204 }));
   await page.getByRole('button', { name: 'Меню аккаунта' }).click();
   await page.getByRole('banner').getByRole('link', { name: 'Избранное', exact: true }).click();
   await expect(page).toHaveURL(/\/favorites$/);
   await expect(page.getByRole('heading', { name: 'Образы', level: 2 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Чемпионы', level: 2 })).toBeVisible();
   await expect(page.getByRole('main').getByRole('listitem')).toHaveCount(2);
+  const skin = page.getByRole('link', { name: /Бессмертная легенда Ари/ });
+  await expect(skin).toHaveAttribute('href', '/skins/immortalized-legend-ahri');
+  await expect(skin).toContainText('Ари');
+  await expect(skin.locator('img')).toHaveAttribute('src', /^https:\/\/raw\.communitydragon\.org\/.+\/global\/default\/assets\/characters\/ahri\/skins\/skin86\//);
 
   // кнопка ♡ убирает из избранного, и это сохраняется на сервере
   const champion = page.getByRole('main').getByRole('listitem').filter({ hasText: 'Ahri' });

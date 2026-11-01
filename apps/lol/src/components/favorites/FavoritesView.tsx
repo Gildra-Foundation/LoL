@@ -8,19 +8,27 @@ import { createJsonLoader } from '@rift/engine/lib/json-loader';
 import { useAccount } from '@/components/account/AccountProvider';
 import { AuthForm } from '@/components/account/AuthForm';
 import { FAVORITE_KINDS, type Favorite, type FavoriteKind } from '@/lib/account/shared';
+import meta from '@/data/meta.json';
 import { defineMessages, type Locale } from '@/lib/i18n';
 import { FavoriteButton } from './FavoriteButton';
 import styles from './Favorites.module.css';
 
-/** Запись облегчённого списка образов (/[lang]/skins-index.json, собирается вместе с каталогом). */
+/** Нужные здесь поля облегчённого списка образов (/[lang]/skins-index.json, собирается вместе с каталогом). */
 export interface SkinIndexEntry {
   id: number | string;
   slug: string;
   name: string;
   champion: string;
+  championName?: string;
+  /** путь файла игры на CommunityDragon (как в skins.json) или готовый адрес */
   tile: string;
   rarity?: string | null;
 }
+
+/** Адрес картинки: то же, что cdAsset из lib/skin-assets — патч берётся из meta.json, который собирается вместе с образами. */
+const CD_PATCH = (meta as { skins?: { cdPatch?: string } }).skins?.cdPatch ?? 'latest';
+const tileUrl = (tile: string) =>
+  /^(https?:)?\/\//.test(tile) || tile.startsWith('/') ? tile : `https://raw.communitydragon.org/${CD_PATCH}/plugins/rcp-be-lol-game-data/global/default/${tile}`;
 
 const MESSAGES = defineMessages({
   ru: {
@@ -136,9 +144,9 @@ function SkinTile({ favorite, entry }: { favorite: Favorite; entry: SkinIndexEnt
     <li className={styles.tile} data-rarity={entry?.rarity ?? undefined}>
       {entry ? (
         <Link href={`/skins/${entry.slug}`} className={styles.tileLink}>
-          <img src={entry.tile} alt="" loading="lazy" decoding="async" width={280} height={280} />
+          <img src={tileUrl(entry.tile)} alt="" loading="lazy" decoding="async" width={280} height={280} />
           <span className={styles.tileName}>{entry.name}</span>
-          <span className={styles.tileSub}>{entry.champion}</span>
+          <span className={styles.tileSub}>{entry.championName ?? entry.champion}</span>
         </Link>
       ) : (
         <div className={styles.tileLink}>
