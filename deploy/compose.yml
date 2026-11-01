@@ -1,4 +1,4 @@
-# riftden.com на сервере: сайт и nginx с сертификатом Cloudflare Origin.
+# riftden.com на сервере: сайт, база аккаунтов и nginx с сертификатом Cloudflare Origin.
 # Порты 80/443 на сервере занимает nginx Gildra, поэтому Cloudflare ходит сюда на 8443 (правило Origin Rules в зоне riftden.com).
 # Запуск — deploy/deploy.sh на сервере.
 name: riftden
@@ -14,6 +14,22 @@ services:
       PLAUSIBLE_SCRIPT_URL: https://riftden.com/stats/js/script.js
       PLAUSIBLE_API_URL: /stats/api/event
       PLAUSIBLE_SITE_DOMAIN: riftden.com
+      # Аккаунты (lib/account): адрес для ссылок в письмах и проверки Origin, письма — через Postfix хоста.
+      BETTER_AUTH_URL: https://riftden.com
+      EMAIL_TRANSPORT: smtp
+    # DATABASE_URL, BETTER_AUTH_SECRET, TURNSTILE_* — /opt/riftden/riftden.env (root, 600);
+    # SMTP_* и EMAIL_FROM_* — /opt/riftden/mail.env (root, 600): без него письма не уходят (регистрация отвечает ошибкой).
+    env_file:
+      - path: /opt/riftden/riftden.env
+        required: true
+      - path: /opt/riftden/mail.env
+        required: false
+    # SMTP 587 Postfix на самом сервере
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       default: {}
       content: {}
@@ -27,6 +43,35 @@ services:
         max-file: '5'
     expose:
       - '3000'
+
+  # Postgres аккаунтов и избранного: только внутренняя сеть, без портов наружу.
+  # Пароль — POSTGRES_PASSWORD в /opt/riftden/riftden.env; резервные копии — deploy/db-backup.sh по таймеру.
+  db:
+    image: postgres:17-alpine
+    container_name: riftden-db
+    restart: unless-stopped
+    env_file:
+      - path: /opt/riftden/riftden.env
+        required: true
+    environment:
+      POSTGRES_USER: riftden
+      POSTGRES_DB: riftden
+    volumes:
+      - /opt/riftden/db:/var/lib/postgresql/data
+    networks:
+      default: {}
+    shm_size: 128m
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U riftden -d riftden']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
 
   nginx:
     image: nginx:1.27-alpine

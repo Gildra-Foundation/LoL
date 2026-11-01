@@ -6,6 +6,8 @@ import { Footer } from '@rift/engine/layout/Footer';
 import { Header } from '@rift/engine/layout/Header';
 import { SearchPalette } from '@rift/engine/layout/SearchPalette';
 import { formatDate } from '@rift/engine/lib/format';
+import { AccountMenu } from '@/components/account/AccountMenu';
+import { AccountProvider } from '@/components/account/AccountProvider';
 import { Plausible } from '@/components/observability/Plausible';
 import { SiteMetrics } from '@/components/observability/SiteMetrics';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -54,8 +56,9 @@ export default async function RootLayout({ children, params }: { children: React
     <html lang={lang} className={`${tektur.variable} ${geologica.variable}`}>
       <body>
         <LocaleProvider locale={lang}>
+          <AccountProvider>
           <a className="skip-link" href="#main">{lang === 'ru' ? 'Перейти к содержимому' : 'Skip to content'}</a>
-          <Header name={SITE_NAME} mark={SITE_MARK} nav={site.nav} {...site.header} />
+          <Header name={SITE_NAME} mark={SITE_MARK} nav={site.nav} {...site.header} actions={<AccountMenu />} />
           <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: SITE_URL, inLanguage: lang, description: site.description }} />
           <main id="main">{children}</main>
           <Footer
@@ -68,6 +71,7 @@ export default async function RootLayout({ children, params }: { children: React
           <SiteMetrics />
           <Plausible />
           <SearchPalette sections={site.searchSections} {...site.search} />
+          </AccountProvider>
         </LocaleProvider>
       </body>
     </html>

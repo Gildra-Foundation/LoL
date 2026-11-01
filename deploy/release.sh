@@ -40,6 +40,8 @@ for attempt in $(seq 1 30); do
 done
 SMOKE_BASE_URL=http://127.0.0.1:3015 npm run smoke
 PLAYWRIGHT_BASE_URL=http://127.0.0.1:3015 npm run test:e2e
+# База аккаунтов: поднимается один раз и при откате сайта не трогается; миграции применяет сам сайт при запуске.
+docker compose -f deploy/compose.yml up -d --wait db
 SWITCHED=true
 RIFTDEN_IMAGE="$IMAGE" docker compose -f deploy/compose.yml up -d --no-deps web
 # Reload upstream DNS after container replacement.

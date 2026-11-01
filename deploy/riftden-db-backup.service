@@ -1,0 +1,10 @@
+[Unit]
+Description=RiftDen accounts database backup (pg_dump, keep 14)
+Requires=docker.service
+After=docker.service
+[Service]
+Type=oneshot
+ExecStart=/opt/riftden/app/deploy/db-backup.sh
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Nice=10
+IOSchedulingClass=idle
