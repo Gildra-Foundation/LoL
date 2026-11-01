@@ -23,11 +23,13 @@ interface SkinSetPageProps {
   listTitle: string;
   catalogHref: string;
   catalogLabel: string;
+  /** кнопка «В избранное» рядом с заголовком */
+  favorite?: React.ReactNode;
   children?: React.ReactNode;
 }
 
 /** Страница группы образов: набор, тематика, редкость. Фон — сплэш самого нового образа группы. */
-export function SkinSetPage({ lang, crumbs, title, lead, tags, skins, listTitle, catalogHref, catalogLabel, children }: SkinSetPageProps) {
+export function SkinSetPage({ lang, crumbs, title, lead, tags, skins, listTitle, catalogHref, catalogLabel, favorite, children }: SkinSetPageProps) {
   const cover = skins.find((s) => s.images.splash);
   const shown = skins.slice(0, LIMIT).map((s) => ({
     id: s.id,
@@ -59,7 +61,12 @@ export function SkinSetPage({ lang, crumbs, title, lead, tags, skins, listTitle,
           </nav>
           <h1 className={styles.title}>{title}</h1>
           {lead && <p className={styles.lead}>{lead}</p>}
-          {tags && <div className={styles.tags}>{tags}</div>}
+          {(tags || favorite) && (
+            <div className={styles.tags}>
+              {tags}
+              {favorite}
+            </div>
+          )}
         </div>
       </section>
       <div className="container">

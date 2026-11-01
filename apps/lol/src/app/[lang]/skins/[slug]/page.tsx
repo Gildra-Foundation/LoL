@@ -3,6 +3,7 @@ import Link from '@rift/engine/i18n/Link';
 import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Icon } from '@/components/Icon';
+import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 import { SkinGrid } from '@/components/skins/SkinCard';
 import { SkinMedia } from '@/components/skins/SkinMedia';
 import { SkinViewer } from '@/components/skins/SkinViewer';
@@ -176,6 +177,7 @@ export default async function SkinPage({ params }: Params) {
               </Tag>
             )}
             {s.legacy && <Tag>{t.legacy}</Tag>}
+            <FavoriteButton kind="skin" id={s.id} />
             {lines.map((l) => (
               <Tag key={l.id} href={lineHref(l.slug)}>
                 {l.name}

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Tag } from '@rift/engine/ui/Tag';
 import { plural } from '@rift/engine/lib/format';
+import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 import { SkinSetPage } from '@/components/skins/SkinSetPage';
 import { DEFAULT_LOCALE, alternates, defineMessages, langOf, ogLocale } from '@/lib/i18n';
 import { cdAsset, lineHref, universeHref } from '@/lib/skin-assets';
@@ -66,6 +67,7 @@ export default async function LinePage({ params }: Params) {
       listTitle={t.list(skins.length)}
       catalogHref={`/skins?line=${line.slug}`}
       catalogLabel={t.catalog}
+      favorite={<FavoriteButton kind="skinline" id={line.slug} />}
     />
   );
 }

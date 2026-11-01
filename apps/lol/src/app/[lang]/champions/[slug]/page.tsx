@@ -17,6 +17,7 @@ import { SkinGallery, type SkinData } from '@/components/champion/SkinGallery';
 import { StatsSection, type StatRowData } from '@/components/champion/StatsSection';
 import { Frame } from '@rift/engine/ui/Frame';
 import { Icon } from '@/components/Icon';
+import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 import { Radar } from '@rift/engine/ui/Radar';
 import { Tag } from '@rift/engine/ui/Tag';
 import { getLore, regionOf, relations } from '@/lib/lore';
@@ -339,6 +340,7 @@ export default async function ChampionPage({ params }: Params) {
                 {c.tactical && <Tag>{ATTACK_TYPES[lang][c.tactical.attackType]}</Tag>}
                 {c.tactical && <Tag>{t.damage(DAMAGE_TYPES[lang][c.tactical.damageType])}</Tag>}
                 <Tag title={c.info.difficulty ? `Riot: ${t.outOf10(c.info.difficulty)}` : undefined}>{t.difficultyTag(DIFFICULTY[lang][diff].toLowerCase())}</Tag>
+                <FavoriteButton kind="champion" id={c.slug} />
                 <Tag href={`/builds?c=${c.slug}${c.positions[0] ? `&lane=${c.positions[0].toLowerCase()}` : ''}`} icon={<Icon name="sliders" size={15} />} color="var(--ally)">
                   {t.build}
                 </Tag>

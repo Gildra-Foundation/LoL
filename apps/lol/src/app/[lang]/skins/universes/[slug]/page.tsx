@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from '@rift/engine/i18n/Link';
 import { notFound } from 'next/navigation';
 import { plural } from '@rift/engine/lib/format';
+import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 import { SkinSetPage } from '@/components/skins/SkinSetPage';
 import { DEFAULT_LOCALE, alternates, defineMessages, langOf, ogLocale } from '@/lib/i18n';
 import { cdAsset, lineHref, universeHref } from '@/lib/skin-assets';
@@ -70,6 +71,7 @@ export default async function UniversePage({ params }: Params) {
       listTitle={t.list(skins.length)}
       catalogHref={`/skins?universe=${u.slug}`}
       catalogLabel={t.catalog}
+      favorite={<FavoriteButton kind="universe" id={u.slug} />}
     >
       {lines.length > 1 && (
         <section className={styles.block}>
