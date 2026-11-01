@@ -103,12 +103,31 @@ def ensure_origin_port(cf, zone_id):
     print(f"origin rule: {', '.join(HOSTS)} → порт {ORIGIN_PORT}")
 
 
+def ensure_media_cache(cf, zone_id):
+    """/media/ — модели, озвучка, картинки: кэш на краю по заголовкам сервера (immutable на год, current.json — 5 минут)."""
+    rule = {
+        "description": "riftden: кэш медиа образов /media/",
+        "expression": '(http.host eq "riftden.com" and starts_with(http.request.uri.path, "/media/"))',
+        "action": "set_cache_settings",
+        "action_parameters": {"cache": True, "edge_ttl": {"mode": "respect_origin"}, "browser_ttl": {"mode": "respect_origin"}},
+        "enabled": True,
+    }
+    try:
+        current = cf.request("GET", f"/zones/{zone_id}/rulesets/phases/http_request_cache_settings/entrypoint")
+        others = [r for r in current.get("rules", []) if not r.get("description", "").startswith("riftden:")]
+    except SystemExit:
+        others = []
+    cf.request("PUT", f"/zones/{zone_id}/rulesets/phases/http_request_cache_settings/entrypoint", {"rules": others + [rule]})
+    print("cache rule: /media/ по заголовкам сервера")
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--env", required=True, help="env-файл с CLOUDFLARE_API_EMAIL и CLOUDFLARE_GLOBAL_API_KEY")
     p.add_argument("--ip", required=True, help="IPv4 сервера")
     p.add_argument("--cert", action="store_true", help="выпустить сертификат Origin")
     p.add_argument("--dns", action="store_true", help="DNS, строгий SSL и правило порта")
+    p.add_argument("--cache", action="store_true", help="правило кэша для /media/")
     args = p.parse_args()
 
     env = read_env(args.env)
@@ -124,6 +143,8 @@ def main():
         ensure_origin_port(cf, zone_id)
         ensure_settings(cf, zone_id)
         ensure_dns(cf, zone_id, args.ip)
+    if args.cache:
+        ensure_media_cache(cf, zone_id)
 
 
 if __name__ == "__main__":
