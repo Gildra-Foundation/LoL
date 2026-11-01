@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "RiftDen \u2014 \u0441\u043f\u0440\u0430\u0432\u043e\u0447\u043d\u0438\u043a \u043f\u043e \u0447\u0435\u043c\u043f\u0438\u043e\u043d\u0430\u043c League of Legends",
+  "description": "RiftDen — справочник по чемпионам League of Legends",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -20,6 +20,10 @@
     "react-dom": "^19.3.0",
     "remark-gfm": "^4.0.1",
     "server-only": "^0.0.1",
+    "three": "0.186.0",
     "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/three": "0.186.0"
   }
 }

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Icon } from '@/components/Icon';
 import { SkinGrid } from '@/components/skins/SkinCard';
+import { SkinMedia } from '@/components/skins/SkinMedia';
 import { SkinViewer } from '@/components/skins/SkinViewer';
 import { Tag } from '@rift/engine/ui/Tag';
 import { formatDate, plural } from '@rift/engine/lib/format';
@@ -192,6 +193,7 @@ export default async function SkinPage({ params }: Params) {
             chromas={s.chromas}
             animated={s.video.splash}
           />
+          <SkinMedia id={s.id} chromas={s.chromas} />
           {s.description && <p className={styles.description}>{s.description}</p>}
           {s.features.length > 0 && (
             <section className={styles.sub}>
