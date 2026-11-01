@@ -28,6 +28,12 @@ assert(sitemap.includes(`${canonical}/champions/garen`)); assert(sitemap.include
 for (const path of ['/search-index.json', '/en/search-index.json', '/skins-index.json', '/en/skins-index.json', '/build-data.json', '/en/build-data.json', '/health.json']) {
   const response = await fetch(base + path); assert.equal(response.status, 200, path); await response.json();
 }
+const accountConfig = await fetch(base + '/api/account-config');
+assert.equal(accountConfig.status, 200, 'account config');
+const accounts = await accountConfig.json();
+if (process.env.SMOKE_EXPECT_ACCOUNTS) assert.equal(accounts.enabled, true, 'accounts enabled');
+const favoritesAnon = await fetch(base + '/api/favorites');
+assert([401, 503].includes(favoritesAnon.status), `favorites without session: ${favoritesAnon.status}`);
 const metric = await fetch(base + '/metrics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'page_view', value: 1, page: 'home' }) });
 assert.equal(metric.status, 204, 'metrics accepted');
 const invalidMetric = await fetch(base + '/metrics', { method: 'POST', body: JSON.stringify({ name: 'arbitrary', value: -1, page: 'private-query' }) });
