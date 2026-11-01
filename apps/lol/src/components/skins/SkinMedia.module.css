@@ -149,3 +149,27 @@
   color: var(--bone);
   box-shadow: inset 0 0 0 1px var(--ally);
 }
+
+.group {
+  border-top: 1px solid var(--line);
+}
+
+.group summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  color: var(--bone);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.group summary .num {
+  color: var(--ash-2);
+  font-weight: 400;
+  font-size: var(--fs-12);
+}
+
+.group .lines {
+  padding-bottom: 12px;
+}

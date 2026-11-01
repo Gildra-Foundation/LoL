@@ -12,15 +12,17 @@ export interface ModelViewerProps {
   /** порядок кнопок анимаций; имена клипов из glb */
   animations: string[];
   animationLabel: (name: string) => string;
-  /** текстура хромы вместо исходной; null — исходная */
-  texture: string | null;
+  /** база путей медиа (/media/<патч>/) */
+  base: string;
+  /** id хромы: её текстуры берутся из gltf.userData.riftden.chromas; null — исходные */
+  chroma: string | null;
   labels: { loading: string; error: string; animations: string; rotate: string };
 }
 
 /** 3D-модель образа: вращение мышью или пальцем, колесо — приближение, кнопки — анимации из игры. */
-export default function ModelViewer({ url, animations, animationLabel, texture, labels }: ModelViewerProps) {
+export default function ModelViewer({ url, animations, animationLabel, base, chroma, labels }: ModelViewerProps) {
   const host = useRef<HTMLDivElement>(null);
-  const scene = useRef<{ mixer: THREE.AnimationMixer; clips: THREE.AnimationClip[]; root: THREE.Object3D; base: Map<THREE.Material, THREE.Texture | null> } | null>(null);
+  const scene = useRef<{ mixer: THREE.AnimationMixer; clips: THREE.AnimationClip[]; original: Map<THREE.Material, THREE.Texture | null>; chromas: Record<string, Record<string, string>> } | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [clips, setClips] = useState<string[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
@@ -62,11 +64,12 @@ export default function ModelViewer({ url, animations, animationLabel, texture, 
         const root = gltf.scene;
         world.add(root);
         // кадр по размеру модели
+        root.traverse((o) => (o as THREE.SkinnedMesh).isSkinnedMesh && (o as THREE.SkinnedMesh).computeBoundingBox());
         const box = new THREE.Box3().setFromObject(root);
         const size = box.getSize(new THREE.Vector3());
         const center = box.getCenter(new THREE.Vector3());
         const radius = Math.max(size.x, size.y, size.z) / 2;
-        const distance = radius / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.25;
+        const distance = radius / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.05;
         camera.position.set(center.x, center.y + radius * 0.15, center.z + distance);
         camera.near = distance / 100;
         camera.far = distance * 100;
@@ -74,14 +77,15 @@ export default function ModelViewer({ url, animations, animationLabel, texture, 
         controls.target.copy(center);
         controls.minDistance = distance * 0.35;
         controls.maxDistance = distance * 2.5;
-        const base = new Map<THREE.Material, THREE.Texture | null>();
+        const original = new Map<THREE.Material, THREE.Texture | null>();
         root.traverse((o) => {
           const mesh = o as THREE.Mesh;
           if (!mesh.isMesh) return;
-          for (const m of [mesh.material].flat() as THREE.MeshStandardMaterial[]) base.set(m, m.map ?? null);
+          for (const m of [mesh.material].flat() as THREE.MeshStandardMaterial[]) original.set(m, m.map ?? null);
         });
         const mixer = new THREE.AnimationMixer(root);
-        scene.current = { mixer, clips: gltf.animations, root, base };
+        const chromas = (gltf.userData?.riftden?.chromas ?? {}) as Record<string, Record<string, string>>;
+        scene.current = { mixer, clips: gltf.animations, original, chromas };
         const names = gltf.animations.map((c) => c.name);
         const ordered = [...animations.filter((a) => names.includes(a)), ...names.filter((n) => !animations.includes(n))];
         setClips(ordered);
@@ -130,31 +134,36 @@ export default function ModelViewer({ url, animations, animationLabel, texture, 
     s.mixer.clipAction(clip).reset().fadeIn(0.2).play();
   }, [current, state]);
 
-  // хрома: своя текстура вместо исходной
+  // хрома: свои текстуры у перечисленных материалов (имя материала → файл)
   useEffect(() => {
     const s = scene.current;
     if (!s) return;
+    const files = chroma ? s.chromas[chroma] : undefined;
+    const loaded: THREE.Texture[] = [];
     let cancelled = false;
-    const apply = (map: (m: THREE.Material) => THREE.Texture | null) => {
-      for (const m of s.base.keys()) {
-        (m as THREE.MeshStandardMaterial).map = map(m);
-        m.needsUpdate = true;
+    for (const m of s.original.keys()) {
+      const file = files?.[m.name];
+      const material = m as THREE.MeshStandardMaterial;
+      if (!file) {
+        material.map = s.original.get(m) ?? null;
+        material.needsUpdate = true;
+        continue;
       }
-    };
-    if (!texture) {
-      apply((m) => s.base.get(m) ?? null);
-      return;
+      new THREE.TextureLoader().load(base + file, (tex) => {
+        if (cancelled) return tex.dispose();
+        tex.flipY = false;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        loaded.push(tex);
+        material.map = tex;
+        material.needsUpdate = true;
+      });
     }
-    new THREE.TextureLoader().load(texture, (tex) => {
-      if (cancelled) return tex.dispose();
-      tex.flipY = false;
-      tex.colorSpace = THREE.SRGBColorSpace;
-      apply(() => tex);
-    });
     return () => {
       cancelled = true;
+      for (const m of s.original.keys()) (m as THREE.MeshStandardMaterial).map = s.original.get(m) ?? null;
+      for (const tex of loaded) tex.dispose();
     };
-  }, [texture, state]);
+  }, [chroma, base, state]);
 
   return (
     <div className={styles.model}>
