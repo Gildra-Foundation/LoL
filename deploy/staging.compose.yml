@@ -1,3 +1,4 @@
+# Staging на 127.0.0.1:3016 со своей базой: письма не уходят, а пишутся в ../artifacts/staging-mail (EMAIL_TRANSPORT=capture).
 name: riftden-staging
 services:
   web:
@@ -9,6 +10,33 @@ services:
     image: riftden-staging:local
     ports:
       - '127.0.0.1:3016:3000'
+    environment:
+      DATABASE_URL: postgres://riftden:staging-only@db:5432/riftden
+      BETTER_AUTH_SECRET: staging-only-secret-staging-only-secret
+      BETTER_AUTH_URL: http://127.0.0.1:3016
+      EMAIL_TRANSPORT: capture
+      EMAIL_CAPTURE_DIR: /mail
+    volumes:
+      - ../artifacts/staging-mail:/mail
+    depends_on:
+      db:
+        condition: service_healthy
     tmpfs:
       - /app/apps/lol/.next/cache/images:size=134217728,uid=1000,gid=1000,mode=0755
     restart: unless-stopped
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: riftden
+      POSTGRES_PASSWORD: staging-only
+      POSTGRES_DB: riftden
+    volumes:
+      - staging-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U riftden -d riftden']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+volumes:
+  staging-db: {}

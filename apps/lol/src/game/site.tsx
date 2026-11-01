@@ -136,6 +136,7 @@ export function getSite(lang: Locale): SiteDefinition {
     { href: '/duel', label: t.duel },
     { href: '/guess', label: t.guess },
     { href: '/methodology', label: lang === 'ru' ? 'Данные и методика' : 'Data and methods' },
+    { href: '/privacy', label: lang === 'ru' ? 'Приватность' : 'Privacy' },
   ];
 
   const sources = (

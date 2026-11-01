@@ -35,6 +35,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // служебные файлы Next и файлы из public не трогаем
-  matcher: ['/((?!_next/|favicon\\.svg|robots\\.txt|sitemap\\.xml|metrics(?:/|$)|health\\.json|riot\\.txt).*)'],
+  // служебные файлы Next, файлы из public и /api (у API нет языков) не трогаем
+  matcher: ['/((?!_next/|api(?:/|$)|favicon\\.svg|robots\\.txt|sitemap\\.xml|metrics(?:/|$)|health\\.json|riot\\.txt).*)'],
 };

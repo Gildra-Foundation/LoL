@@ -6,7 +6,7 @@ import { lineHref, rarityHref, skinHref, universeHref } from '@/lib/skin-assets'
 import { getLines, getSkins, getUniverses, rarityCounts } from '@/lib/skins';
 
 // Карта сайта: каждая страница на каждом языке со ссылками на остальные языки (hreflang).
-const SECTIONS = ['/', '/champions', '/skins', '/runeterra', '/items', '/builds', '/tier-list', '/stats', '/compare', '/duel', '/guess', '/methodology'];
+const SECTIONS = ['/', '/champions', '/skins', '/runeterra', '/items', '/builds', '/tier-list', '/stats', '/compare', '/duel', '/guess', '/methodology', '/privacy'];
 
 const url = (lang: Locale, path: string) => SITE_URL + localePath(lang, path);
 

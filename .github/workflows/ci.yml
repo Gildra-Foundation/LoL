@@ -8,6 +8,20 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    # база для тестов аккаунтов: vitest (riftden_test) и e2e (riftden_e2e)
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: riftden
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: riftden_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U riftden" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://riftden:ci@localhost:5432/riftden_test
+      E2E_DATABASE_URL: postgres://riftden:ci@localhost:5432/riftden_e2e
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,6 +35,7 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_SITE_URL: https://riftden.com
+      - run: psql postgres://riftden:ci@localhost:5432/riftden_test -c 'create database riftden_e2e'
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4

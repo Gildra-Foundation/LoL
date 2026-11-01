@@ -14,7 +14,11 @@
 
 ## Staging
 
-`docker compose -f deploy/staging.compose.yml up -d --build`: локальная отдельная версия на 3016. В сборке SITE_PREVIEW=true закрывает индексацию; staging не выставляется наружу. Не использовать этот образ для production.
+`docker compose -f deploy/staging.compose.yml up -d --build`: локальная отдельная версия на 3016 со своей базой; письма пишутся в `artifacts/staging-mail` (см. docs/accounts.md). В сборке SITE_PREVIEW=true закрывает индексацию; staging не выставляется наружу. Не использовать этот образ для production.
+
+## Аккаунты
+
+Перед первым релизом с аккаунтами на сервере нужны `/opt/riftden/riftden.env` и `/opt/riftden/mail.env` (root, 600), состав — в docs/accounts.md. Релиз поднимает сервис `db`; миграции применяет сайт при запуске. Резервные копии базы — таймер `riftden-db-backup.timer`.
 
 ## Наблюдение
 
