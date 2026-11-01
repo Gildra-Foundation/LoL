@@ -1,0 +1,10 @@
+{
+  "name": "riftden-media-qa",
+  "private": true,
+  "type": "module",
+  "description": "Screenshots of generated glb models (three.js in headless Chromium)",
+  "dependencies": {
+    "playwright": "1.64.0",
+    "three": "0.181.0"
+  }
+}

@@ -1,0 +1,4 @@
+node_modules/
+riftmodel/bin/
+riftmodel/obj/
+__pycache__/
