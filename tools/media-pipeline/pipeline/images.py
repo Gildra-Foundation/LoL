@@ -59,7 +59,7 @@ def convert_image(data, out_webp, avif=False, quality=82):
         _run(["cwebp", "-quiet", "-q", str(quality), "-m", "5", "-mt", "-alpha_q", "90", src, "-o", tmp_webp])
         if avif:
             tmp_avif = os.path.join(tmp, "o.avif")
-            _run(["avifenc", "--speed", "6", "--min", "22", "--max", "34", "-j", "2", src, tmp_avif])
+            _run(["avifenc", "--speed", "8", "--min", "22", "--max", "34", "-j", "2", src, tmp_avif])
             os.replace(tmp_avif, out_webp[:-5] + ".avif")
         os.replace(tmp_webp, out_webp)
 

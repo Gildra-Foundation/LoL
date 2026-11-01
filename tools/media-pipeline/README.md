@@ -150,6 +150,15 @@ CORS не нужен (тот же домен). Cloudflare по умолчани�
 - `report.json`: `counts` (скинов, с glb, с озвучкой en/ru, voFrom), `bytes`, `timings`, `failures[]` (`stage`: images/model/animations/vo-en/vo-ru/champion, `reason`).
 - Глазами: `cd qa && npm ci && node render.mjs /tmp/shots /opt/riftden/media/16.21/models/103014.glb@dance` (в образе `mcr.microsoft.com/playwright:v1.64.0-noble`).
 
+### Первый полный прогон: 16.21 (2026-11-01)
+
+- 2 ч 55 мин (`--workers 3`, 6 CPU), 9,1 ГБ: models 4,4 ГБ, vo 3,6 ГБ, images 694 МБ, video 441 МБ.
+- 2178 записей (2173 скина + ступени): картинки у всех, glb у 2113, своя озвучка en/ru у 578,
+  `voFrom` у 1559; 7166 хром, у 6925 есть текстура; 161 329 реплик (en + ru вместе).
+- Без модели 65: 41 «Jade_*» (нет WAD) и 24 ошибки конвертера LeagueToolkit (индексы
+  вершин вне буфера, > 256 влияний костей, неверная матрица/тангенты). У 17 скинов
+  часть анимаций пропущена (NaN в `.anm`). Полный список — `report.json`.
+
 ## Известные ограничения
 
 - 41 скин режима «Jade_*» (id 60001xxx…) не имеет WAD в клиенте игры → только картинки.
