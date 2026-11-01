@@ -1,5 +1,6 @@
 // Render glb models to PNG with three.js in headless Chromium.
-// usage: node render.mjs <out-dir> <model.glb>[@animation] ...
+// usage: node render.mjs <out-dir> <model.glb>[@animation[@chromaId]] ...
+// A chroma is applied from gltf extras.riftden.chromas (paths relative to the patch root).
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium } from 'playwright';
@@ -14,7 +15,7 @@ const html = `<!doctype html><html><body style="margin:0;background:#1b2330">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-window.render = async (url, clip, t) => {
+window.render = async (url, clip, t, chroma, patchRoot) => {
   const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
   renderer.setSize(640, 640);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -27,6 +28,19 @@ window.render = async (url, clip, t) => {
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const gltf = await loader.loadAsync(url);
   scene.add(gltf.scene);
+  const swap = chroma ? (gltf.userData.riftden?.chromas ?? {})[chroma] : null;
+  if (chroma && !swap) throw new Error('no chroma ' + chroma + ' in extras');
+  if (swap) {
+    const tl = new THREE.TextureLoader();
+    const meshes = []; gltf.scene.traverse((o) => { if (o.isMesh) meshes.push(o); });
+    for (const o of meshes) {
+      const file = swap[o.material.name];
+      if (!file) continue;
+      const tex = await tl.loadAsync(patchRoot + file);
+      tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace;
+      o.material = o.material.clone(); o.material.map = tex; o.material.needsUpdate = true;
+    }
+  }
   const names = gltf.animations.map((a) => a.name);
   const mixer = new THREE.AnimationMixer(gltf.scene);
   const anim = gltf.animations.find((a) => a.name === clip) || gltf.animations[0];
@@ -59,10 +73,11 @@ await page.route('**/*', async (route) => {
 await page.goto('http://qa.local/');
 await page.waitForFunction(() => window.ready);
 for (const spec of models) {
-  const [file, clip = 'idle'] = spec.split('@');
+  const [file, clip = 'idle', chroma] = spec.split('@');
+  const patchRoot = '/model' + path.resolve(path.dirname(file), '..') + '/';
   try {
-    const info = await page.evaluate(([u, c]) => window.render(u, c, 0.4), ['/model' + path.resolve(file), clip]);
-    const shot = path.join(outDir, `${path.basename(file, '.glb')}-${clip}.png`);
+    const info = await page.evaluate(([u, c, ch, root]) => window.render(u, c, 0.4, ch, root), ['/model' + path.resolve(file), clip, chroma, patchRoot]);
+    const shot = path.join(outDir, `${path.basename(file, '.glb')}-${clip}${chroma ? '-' + chroma : ''}.png`);
     await page.locator('canvas').screenshot({ path: shot });
     console.log(JSON.stringify({ file, clip, ...info, shot }));
   } catch (e) {

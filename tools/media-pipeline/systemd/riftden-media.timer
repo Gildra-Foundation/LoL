@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily check for a new LoL patch (RiftDen media pipeline)
+
+[Timer]
+OnCalendar=*-*-* 05:30:00 UTC
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

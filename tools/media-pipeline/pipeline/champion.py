@@ -68,7 +68,10 @@ class ChampionJob:
         shutil.rmtree(self.work, ignore_errors=True)
         os.makedirs(self.work)
         try:
-            self.fetch()
+            if not self.fetch():
+                for s in self.champ["skins"]:
+                    self.skin_state(s["id"])["modelError"] = "no champion WAD in the live game client"
+                return self.state
             self.data = gd.ChampionData(self.main, self.alias)
             self.models()
             self.voice()
@@ -80,7 +83,6 @@ class ChampionJob:
         return self.state
 
     def fetch(self):
-        manifest = self.ctx["manifest"]
         files = self.ctx["manifest_files"]  # lowercased name -> PatcherFile
         self.wads = {}
         base = f"data/final/champions/{self.alias.lower()}"
@@ -90,15 +92,15 @@ class ChampionJob:
         for key, name in wanted.items():
             pf = files.get(name)
             if pf is None:
-                if key == "main":
-                    raise RuntimeError(f"{name} not in live manifest")
                 self.state["errors"].append(f"{name} not in live manifest")
+                if key == "main":
+                    return False
                 continue
             local = os.path.join(self.work, os.path.basename(pf.name))
             rman_fetch.fetch_file(pf, local)
             self.wads[key] = gd.WadReader(local, pf.name)
         self.main = self.wads["main"]
-        del manifest
+        return True
 
     # ---- models ---------------------------------------------------------
     def tex_file(self, h):

@@ -292,9 +292,12 @@ def cleanup(root):
 
 def update(args):
     patch, version = cdragon_patch()
-    log(f"CommunityDragon {version}")
+    live_version, _ = rman_fetch.live_manifest_url()
+    log(f"CommunityDragon {version}, live game {live_version}")
     if os.path.exists(os.path.join(args.out, patch, "manifest.json")):
         log(f"{patch} already built")
+    elif not live_version.startswith(patch + "."):
+        log(f"live game and CommunityDragon differ: waiting for the next check")
     else:
         args.patch = patch
         build(args)
