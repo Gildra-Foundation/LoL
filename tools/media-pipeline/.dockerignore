@@ -1,0 +1,5 @@
+node/node_modules
+qa/node_modules
+riftmodel/bin
+riftmodel/obj
+**/__pycache__

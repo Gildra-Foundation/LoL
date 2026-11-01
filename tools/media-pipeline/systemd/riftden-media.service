@@ -1,0 +1,17 @@
+[Unit]
+Description=RiftDen media pipeline: skin models, voice-over and pictures for the current LoL patch
+Documentation=file:///home/debian/Riftden-media-20261101/tools/media-pipeline/README.md
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# at least 20 GB free before a new patch is built (a full patch is ~12 GB)
+ExecStartPre=/bin/sh -c 'test "$(df --output=avail -BG /opt/riftden/media | tail -1 | tr -dc 0-9)" -ge 20'
+ExecStartPre=-/usr/bin/docker rm -f riftden-media
+ExecStart=/usr/bin/docker run --rm --name riftden-media --cpus 4 --memory 8g -u 1000:1000 \
+  -v /opt/riftden/media:/out -v /var/cache/riftden-media:/cache \
+  riftden-media:current update --workers 3 --image-threads 4 --audio-threads 3
+ExecStopPost=-/usr/bin/docker rm -f riftden-media
+TimeoutStartSec=12h
