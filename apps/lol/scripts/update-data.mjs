@@ -11,7 +11,7 @@ const backup = source + '.previous';
 try {
   stage = await mkdtemp(source + '.stage-');
   await cp(source, stage, { recursive: true });
-  for (const script of ['fetch-data.mjs', 'fetch-items.mjs', 'fetch-regions.mjs', 'validate-data.mjs']) {
+  for (const script of ['fetch-data.mjs', 'fetch-items.mjs', 'fetch-regions.mjs', 'fetch-skins.mjs', 'validate-data.mjs']) {
     const result = spawnSync(process.execPath, [path.join(scripts, script)], {
       stdio: 'inherit', env: { ...process.env, RIFTDEN_DATA_DIR: stage },
     });

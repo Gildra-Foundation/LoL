@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation';
 import { ViewTransition } from 'react';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { breadcrumbData } from '@/lib/seo';
+import { skinHref } from '@/lib/skin-assets';
+import { skinsOfChampion } from '@/lib/skins';
 import { AbilitiesSection, type AbilityFull } from '@/components/champion/AbilitiesSection';
 import { ChampionChip } from '@/components/champion/ChampionChip';
 import { ChampionProvider } from '@/components/champion/ChampionProvider';
@@ -69,6 +71,7 @@ const MESSAGES = defineMessages({
     statsLabel: 'Характеристики',
     abilitiesLabel: 'Умения',
     skinsLead: (count: string) => `${count} и базовый. Цвет полоски под названием — редкость образа.`,
+    allSkins: 'Все образы с ценами, хромами и наборами',
     tips: 'Подсказки из клиента',
     playingAs: (name: string) => `Если играете за ${name}`,
     playingAgainst: 'Если играете против',
@@ -126,6 +129,7 @@ const MESSAGES = defineMessages({
     statsLabel: 'Stats',
     abilitiesLabel: 'Abilities',
     skinsLead: (count: string) => `${count} plus the base one. The color of the bar under the name shows the skin's rarity.`,
+    allSkins: 'All skins with prices, chromas and lines',
     tips: 'Tips from the client',
     playingAs: (name: string) => `Playing as ${name}`,
     playingAgainst: 'Playing against',
@@ -254,6 +258,7 @@ export default async function ChampionPage({ params }: Params) {
   const rows = MAIN_KEYS.filter((k) => hasResource || (k !== 'mp' && k !== 'mpregen')).map((k) => statRow(c, k, lang));
   const derived = DERIVED_KEYS.map((k) => statRow(c, k, lang));
 
+  const skinPages = new Map(skinsOfChampion(c.id, lang).map((s) => [s.num, skinHref(s.slug)]));
   const skins: SkinData[] = c.skins.map((s) => ({
     num: s.num,
     name: s.name,
@@ -262,6 +267,7 @@ export default async function ChampionPage({ params }: Params) {
     rarity: s.rarity ? (RARITIES[lang][s.rarity] ?? null) : null,
     legacy: s.legacy,
     chromas: s.chromas,
+    href: skinPages.get(s.num) ?? null,
   }));
 
   const similar = similarChampions(c, lang, 6);
@@ -356,7 +362,10 @@ export default async function ChampionPage({ params }: Params) {
         <div className="container">
           <section id="skins" className={styles.block}>
             <h2 className={styles.h2}>{t.skins}</h2>
-            <p className={styles.lead}>{t.skinsLead(t.skinCount(skinCount))}</p>
+            <p className={styles.lead}>
+              {t.skinsLead(t.skinCount(skinCount))}{' '}
+              <Link href={`/skins?champion=${c.slug}`}>{t.allSkins}</Link>
+            </p>
             <SkinGallery skins={skins} />
           </section>
 

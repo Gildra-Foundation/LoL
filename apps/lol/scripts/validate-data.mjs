@@ -7,6 +7,7 @@ const meta = await read('meta.json');
 assert(/^\d+\.\d+\.\d+$/.test(meta.version), 'Invalid patch');
 assert(Number.isFinite(Date.parse(meta.fetchedAt)), 'Invalid update date');
 let reference;
+let skinReference;
 for (const { code } of LOCALES) {
   const champions = await read(`${code}/champions.json`);
   const ids = new Set(champions.map((c) => c.id));
@@ -39,6 +40,25 @@ for (const { code } of LOCALES) {
   const lore = await read(`${code}/lore.json`);
   assert(regions.regions?.length > 0 && Object.keys(lore).length > 0, `${code}: lore/regions empty`);
   for (const region of regions.regions ?? []) assert(region.name && pages[region.slug], `${code}/${region.slug}: missing region page`);
+  const skins = await read(`${code}/skins.json`);
+  const sets = await read(`${code}/skin-sets.json`);
+  const championIds = new Set(champions.map((c) => c.id));
+  const lineIds = new Set(sets.lines.map((l) => l.id));
+  const universeIds = new Set(sets.universes.map((u) => u.id));
+  const skinSlugs = new Set(skins.map((s) => s.slug));
+  assert(skins.length > 2000 && new Set(skins.map((s) => s.id)).size === skins.length && skinSlugs.size === skins.length, `${code}: skins incomplete/duplicate`);
+  assert(sets.lines.length > 150 && sets.universes.length > 80, `${code}: skin lines/universes incomplete`);
+  for (const s of skins) {
+    assert(s.name && /^[a-z0-9-]+$/.test(s.slug) && championIds.has(s.champion), `${code}/${s.id}: skin name/slug/champion`);
+    assert(s.images.splash && s.images.tile && !/^\/|\.\./.test(s.images.splash), `${code}/${s.id}: skin images`);
+    assert(s.lines.every((id) => lineIds.has(id)) && s.universes.every((id) => universeIds.has(id)), `${code}/${s.id}: skin line/universe refs`);
+    assert(s.parent === null || skins.some((p) => p.id === s.parent), `${code}/${s.id}: skin parent`);
+  }
+  for (const c of champions) assert(skins.some((s) => s.champion === c.id && s.base), `${code}/${c.id}: no base skin`);
+  for (const l of sets.lines) assert(/^[a-z0-9-]+$/.test(l.slug) && l.name && l.count > 0, `${code}/line ${l.id}`);
+  for (const u of sets.universes) assert(/^[a-z0-9-]+$/.test(u.slug) && u.name && u.lines.every((id) => lineIds.has(id)), `${code}/universe ${u.id}`);
+  const skinKeys = skins.map((s) => `${s.id}:${s.slug}`).sort().join();
+  if (skinReference) assert(skinReference === skinKeys, `${code}: skins differ between locales`); else skinReference = skinKeys;
 }
 if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; }
-else console.log(`Data OK: patch ${meta.version}, ${meta.count} champions, ${LOCALES.length} locales`);
+else console.log(`Data OK: patch ${meta.version}, ${meta.count} champions, ${meta.skins?.count} skins, ${LOCALES.length} locales`);

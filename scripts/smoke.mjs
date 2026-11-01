@@ -4,7 +4,9 @@ const canonical = process.env.SMOKE_SITE_URL ?? 'https://riftden.com';
 const checks = [
   ['/', 280 * 1024], ['/en', 280 * 1024], ['/champions', 150 * 1024],
   ['/champions/garen', 220 * 1024], ['/items', 260 * 1024], ['/builds', 100 * 1024],
-  ['/methodology', 70 * 1024],
+  ['/methodology', 70 * 1024], ['/skins', 160 * 1024], ['/en/skins', 160 * 1024],
+  ['/skins/star-guardian-ahri', 160 * 1024], ['/skins/lines/star-guardian-season-4', 200 * 1024],
+  ['/skins/universes/star-guardian', 200 * 1024], ['/skins/rarity/legendary', 260 * 1024],
 ];
 for (const [path, budget] of checks) {
   const response = await fetch(base + path, { signal: AbortSignal.timeout(15000) });
@@ -22,8 +24,8 @@ assert.equal(redirect.status, 308); assert(new URL(redirect.headers.get('locatio
 assert(new URL(redirect.headers.get('location'), base).search === '?class=Tank');
 const robots = await (await fetch(base + '/robots.txt')).text(); assert(robots.includes(`${canonical}/sitemap.xml`));
 const sitemap = await (await fetch(base + '/sitemap.xml')).text();
-assert(sitemap.includes(`${canonical}/champions/garen`)); assert(!sitemap.includes('/design')); assert(!sitemap.includes('localhost'));
-for (const path of ['/search-index.json', '/en/search-index.json', '/build-data.json', '/en/build-data.json', '/health.json']) {
+assert(sitemap.includes(`${canonical}/champions/garen`)); assert(sitemap.includes(`${canonical}/skins/star-guardian-ahri`)); assert(!sitemap.includes('/design')); assert(!sitemap.includes('localhost'));
+for (const path of ['/search-index.json', '/en/search-index.json', '/skins-index.json', '/en/skins-index.json', '/build-data.json', '/en/build-data.json', '/health.json']) {
   const response = await fetch(base + path); assert.equal(response.status, 200, path); await response.json();
 }
 const metric = await fetch(base + '/metrics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'page_view', value: 1, page: 'home' }) });

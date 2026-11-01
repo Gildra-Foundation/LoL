@@ -1,0 +1,156 @@
+.viewer {
+  display: grid;
+  gap: 14px;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #0b100e;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.stage img,
+.stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stage[data-portrait='true'] img {
+  width: auto;
+  object-fit: contain;
+}
+
+.stage[data-chroma='true'] {
+  background: radial-gradient(circle at 50% 60%, #1d2925, #0b100e 70%);
+}
+
+.stage[data-chroma='true'] img {
+  width: auto;
+  max-height: 92%;
+  object-fit: contain;
+}
+
+.zoom {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(13, 19, 17, 0.75);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--bone);
+}
+
+.zoom:hover {
+  box-shadow: inset 0 0 0 1px var(--ally);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tabs button {
+  height: 34px;
+  padding: 0 12px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-size: var(--fs-14);
+}
+
+.tabs button:hover {
+  color: var(--bone);
+}
+
+.tabs button[aria-pressed='true'] {
+  background: #1b2622;
+  box-shadow: inset 0 0 0 1px var(--ally);
+  color: var(--bone);
+}
+
+.chromas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.label {
+  margin-right: 4px;
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.swatch {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.swatch span {
+  width: 20px;
+  height: 20px;
+  transform: rotate(45deg);
+}
+
+.swatch[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px var(--bone);
+}
+
+.chromaName {
+  margin-left: 6px;
+  color: var(--bone);
+  font-size: var(--fs-14);
+}
+
+.lightbox {
+  max-width: 100vw;
+  max-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  border: 0;
+  background: rgba(5, 8, 7, 0.94);
+}
+
+.lightbox img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.lightbox::backdrop {
+  background: rgba(5, 8, 7, 0.8);
+}
+
+.close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  color: var(--bone);
+}

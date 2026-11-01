@@ -22,6 +22,7 @@ const TEXT = defineMessages({
     description:
       'Характеристики всех чемпионов League of Legends на каждом уровне, умения с перезарядкой и видео, предметы, руны и билды, карта Рунтерры, тир-лист и сравнение.',
     champions: 'Чемпионы',
+    skins: 'Образы',
     runeterra: 'Рунтерра',
     items: 'Предметы',
     builds: 'Билды',
@@ -37,13 +38,14 @@ const TEXT = defineMessages({
     mobileBadge: `Данные патча ${PATCH}`,
     sections: {
       champions: ['Все чемпионы', 'Каталог с фильтрами по классу и позиции'],
+      skins: ['Образы', 'Все образы по наборам, тематикам и редкостям'],
       runeterra: ['Рунтерра', 'Карта мира: регионы, их история и чемпионы'],
       items: ['Предметы', 'Цены, характеристики, рецепты и улучшения'],
       builds: ['Конструктор билдов', 'Руны, заклинания и предметы с расчётом характеристик'],
       stats: ['Рейтинги', 'Таблица характеристик на любом уровне'],
       compare: ['Сравнение', 'Два чемпиона на одной шкале'],
     },
-    placeholder: 'Чемпион, предмет или регион',
+    placeholder: 'Чемпион, образ, предмет или регион',
     emptyHint: 'Проверьте написание или поищите по классу.',
     loading: 'Загружаю список чемпионов…',
     about: (count: number, version: string, date: string) =>
@@ -56,6 +58,7 @@ const TEXT = defineMessages({
     description:
       'Stats of every League of Legends champion at every level, abilities with cooldowns and videos, items, runes and builds, the map of Runeterra, a tier list and comparisons.',
     champions: 'Champions',
+    skins: 'Skins',
     runeterra: 'Runeterra',
     items: 'Items',
     builds: 'Builds',
@@ -71,13 +74,14 @@ const TEXT = defineMessages({
     mobileBadge: `Patch ${PATCH} data`,
     sections: {
       champions: ['All champions', 'Catalog with class and position filters'],
+      skins: ['Skins', 'Every skin by line, universe and rarity'],
       runeterra: ['Runeterra', 'World map: regions, their history and champions'],
       items: ['Items', 'Prices, stats, recipes and upgrades'],
       builds: ['Build editor', 'Runes, spells and items with stat calculations'],
       stats: ['Rankings', 'Stat table at any level'],
       compare: ['Compare', 'Two champions on one scale'],
     },
-    placeholder: 'Champion, item or region',
+    placeholder: 'Champion, skin, item or region',
     emptyHint: 'Check the spelling or search by class.',
     loading: 'Loading the champion list…',
     about: (count: number, version: string, date: string) =>
@@ -93,14 +97,15 @@ export function getSite(lang: Locale): SiteDefinition {
 
   const nav: NavItem[] = [
     { href: '/champions', label: t.champions },
+    { href: '/skins', label: t.skins },
     { href: '/runeterra', label: t.runeterra },
     { href: '/items', label: t.items },
     { href: '/builds', label: t.builds },
-    { href: '/tier-list', label: t.tierList },
     { href: '/stats', label: t.stats },
     {
       label: t.tools,
       children: [
+        { href: '/tier-list', label: t.tierList },
         { href: '/compare', label: t.compare },
         { href: '/duel', label: t.duel },
         { href: '/guess', label: t.guess },
@@ -111,6 +116,7 @@ export function getSite(lang: Locale): SiteDefinition {
   const section = (href: string, [title, sub]: string[]): SearchEntry => ({ href, title, sub });
   const searchSections: SearchEntry[] = [
     section('/champions', t.sections.champions),
+    section('/skins', t.sections.skins),
     section('/runeterra', t.sections.runeterra),
     section('/items', t.sections.items),
     section('/builds', t.sections.builds),
@@ -120,6 +126,7 @@ export function getSite(lang: Locale): SiteDefinition {
 
   const footerLinks: NavLink[] = [
     { href: '/champions', label: t.champions },
+    { href: '/skins', label: t.skins },
     { href: '/runeterra', label: t.runeterra },
     { href: '/items', label: t.items },
     { href: '/builds', label: t.buildEditor },

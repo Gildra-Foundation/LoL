@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import Link from '@rift/engine/i18n/Link';
 import { Icon } from '@/components/Icon';
 import { useLocale } from '@rift/engine/i18n/LocaleProvider';
 import { defineMessages } from '@rift/engine/i18n/locale';
@@ -21,6 +22,7 @@ const MESSAGES = defineMessages({
     prev: 'Предыдущий образ',
     next: 'Следующий образ',
     close: 'Закрыть',
+    page: 'Страница образа',
   },
   en: {
     back: 'Scroll back',
@@ -35,6 +37,7 @@ const MESSAGES = defineMessages({
     prev: 'Previous skin',
     next: 'Next skin',
     close: 'Close',
+    page: 'Skin page',
   },
 });
 
@@ -46,6 +49,8 @@ export interface SkinData {
   rarity: { label: string; color: string } | null;
   legacy: boolean;
   chromas: number;
+  /** адрес страницы образа */
+  href: string | null;
 }
 
 /** Лента образов; по нажатию — полноразмерный сплэш-арт с листанием стрелками. */
@@ -112,6 +117,11 @@ export function SkinGallery({ skins }: { skins: SkinData[] }) {
           <img src={skin.splash} alt={skin.name} width={1215} height={717} />
           <figcaption>
             <span className={styles.lbName}>{skin.name}</span>
+            {skin.href && (
+              <Link href={skin.href} className={styles.lbLink}>
+                {t.page}
+              </Link>
+            )}
             <span className={styles.lbCount}>
               <span className="num">{current + 1}</span> {t.of} <span className="num">{skins.length}</span>
             </span>

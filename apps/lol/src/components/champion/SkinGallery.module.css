@@ -168,3 +168,12 @@
     grid-auto-columns: 44%;
   }
 }
+
+.lbLink {
+  color: var(--ally);
+  font-size: var(--fs-14);
+}
+
+.lbLink:hover {
+  text-decoration: underline;
+}

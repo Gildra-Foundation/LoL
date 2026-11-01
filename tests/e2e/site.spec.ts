@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-for (const path of ['/', '/champions', '/champions/garen', '/items', '/builds', '/methodology']) {
+for (const path of ['/', '/champions', '/champions/garen', '/items', '/builds', '/methodology', '/skins', '/skins/star-guardian-ahri']) {
   test(`page renders without errors or horizontal overflow: ${path}`, async ({ page }, testInfo) => {
     const errors: string[] = []; page.on('pageerror', (error) => errors.push(error.message));
     const response = await page.goto(path);
@@ -60,6 +60,21 @@ test('catalog search and role filter persist in the URL', async ({ page }) => {
   await filterToggle.waitFor({ state: 'attached' });
   if (await filterToggle.isVisible()) await filterToggle.click();
   await expect(page.getByRole('textbox', { name: 'Поиск по имени' })).toHaveValue('Гарен');
+});
+test('skin catalog filters persist in the URL and open a skin page', async ({ page }) => {
+  await page.goto('/skins?champion=ahri');
+  const filterToggle = page.getByRole('button', { name: /^Фильтры/, includeHidden: true });
+  await filterToggle.waitFor({ state: 'attached' });
+  if (await filterToggle.isVisible()) await filterToggle.click();
+  await expect(page.getByRole('combobox', { name: 'Чемпион' })).toHaveValue('ahri');
+  await page.getByRole('group', { name: 'Редкость', exact: true }).getByRole('button', { name: 'Легендарный' }).click();
+  await expect(page).toHaveURL(/rarity=legendary/);
+  await page.getByRole('main').getByRole('link', { name: /Звездная защитница Ари/ }).first().click();
+  await expect(page).toHaveURL(/\/skins\/star-guardian-ahri$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Звездная защитница Ари');
+  const chromas = page.getByRole('group', { name: 'Хромы' });
+  await chromas.getByRole('button').nth(1).click();
+  await expect(chromas.getByRole('button').nth(1)).toHaveAttribute('aria-pressed', 'true');
 });
 test('comparison changes stats and preserves selected level', async ({ page }) => {
   await page.goto('/compare?a=garen&b=darius');

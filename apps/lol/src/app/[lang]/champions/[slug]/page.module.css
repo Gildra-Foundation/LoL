@@ -502,3 +502,13 @@
     padding: 18px 16px 20px;
   }
 }
+
+.lead a {
+  color: var(--ally);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lead a:hover {
+  text-decoration: underline;
+}

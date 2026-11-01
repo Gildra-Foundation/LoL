@@ -1,0 +1,309 @@
+/* Раздел «Образы»: первый экран со сплэш-артом, сведения, блоки со списками образов. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  padding-top: clamp(120px, 26vh, 260px);
+  padding-bottom: 28px;
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0 0 auto;
+  height: min(70vh, 640px);
+  z-index: -1;
+  overflow: hidden;
+}
+
+.heroBg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+}
+
+.heroBg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, var(--night) 4%, rgba(18, 26, 23, 0.65) 40%, rgba(18, 26, 23, 0.1) 75%),
+    linear-gradient(90deg, rgba(18, 26, 23, 0.8), rgba(18, 26, 23, 0) 60%);
+}
+
+.heroCompact {
+  padding-top: clamp(64px, 12vh, 140px);
+}
+
+/* на странице образа арт показан ниже целиком — фон только намекает на цвета */
+.heroBlur img {
+  filter: blur(28px) saturate(1.2);
+  transform: scale(1.15);
+  opacity: 0.55;
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ash);
+  font-size: var(--fs-14);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+
+.crumbs a:hover {
+  color: var(--bone);
+}
+
+.title {
+  margin-top: 10px;
+  font-size: clamp(2.4rem, 7vw, 5.5rem);
+  font-weight: 800;
+  font-variation-settings: 'wdth' 82;
+  line-height: 0.95;
+  text-shadow: 0 4px 40px rgba(0, 0, 0, 0.5);
+  overflow-wrap: anywhere;
+}
+
+.lead {
+  max-width: 70ch;
+  margin-top: 14px;
+  color: var(--bone);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.gem {
+  display: block;
+  width: 9px;
+  height: 9px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 32px;
+  align-items: start;
+}
+
+.main {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.description {
+  max-width: 75ch;
+  color: var(--ash);
+  font-size: var(--fs-18);
+  line-height: 1.6;
+}
+
+.side {
+  position: sticky;
+  top: calc(var(--header-h) + 20px);
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  background: var(--night-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.h2 {
+  font-size: clamp(var(--fs-24), 3vw, var(--fs-32));
+}
+
+.h3 {
+  font-size: var(--fs-21);
+}
+
+.h4 {
+  font-size: var(--fs-14);
+  color: var(--ash-2);
+  font-weight: 600;
+}
+
+.facts {
+  display: grid;
+  margin: 0;
+}
+
+.facts > div {
+  display: grid;
+  grid-template-columns: 9.5em minmax(0, 1fr);
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-14);
+}
+
+.facts dt {
+  color: var(--ash-2);
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--bone);
+}
+
+.facts a,
+.muted a {
+  color: var(--ally);
+}
+
+.facts a:hover,
+.muted a:hover {
+  text-decoration: underline;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+}
+
+.chips li {
+  padding: 4px 9px;
+  background: var(--stone);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ash);
+  font-size: var(--fs-12);
+}
+
+.muted {
+  color: var(--ash-2);
+  font-size: var(--fs-14);
+}
+
+.muted a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.note {
+  color: var(--ash-2);
+  font-size: var(--fs-12);
+}
+
+.sub {
+  display: grid;
+  gap: 12px;
+}
+
+.bullets {
+  display: grid;
+  gap: 6px;
+  padding-left: 1.2em;
+  color: var(--ash);
+  list-style: square;
+}
+
+.clips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin: 0;
+}
+
+.clips li {
+  display: grid;
+  gap: 6px;
+  font-size: var(--fs-14);
+  color: var(--ash);
+}
+
+.clips video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #0b100e;
+}
+
+.clips b {
+  color: var(--bone);
+}
+
+.block {
+  padding-top: clamp(48px, 7vw, 88px);
+}
+
+.blockHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.block > .h2 {
+  margin-bottom: 18px;
+}
+
+.all {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ally);
+  font-size: var(--fs-14);
+  white-space: nowrap;
+}
+
+.all:hover {
+  text-decoration: underline;
+}
+
+/* списки наборов и тематик */
+.sets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px 24px;
+  margin: 0;
+}
+
+.sets a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ash);
+}
+
+.sets a:hover {
+  color: var(--bone);
+}
+
+.sets .num {
+  color: var(--ash-2);
+}
+
+.rarities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 28px;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side {
+    position: static;
+  }
+}
