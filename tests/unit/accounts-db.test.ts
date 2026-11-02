@@ -149,6 +149,13 @@ describe.skipIf(!safe)('accounts with Postgres', () => {
     expect(rows.length).toBe(1);
   });
 
+  it('checks the session far more often than the shared limit allows', async () => {
+    const headers = { 'cf-connecting-ip': '203.0.113.90' };
+    const statuses = new Set<number>();
+    for (let i = 0; i < 150; i++) statuses.add((await call('/get-session', undefined, headers)).status);
+    expect(statuses).toEqual(new Set([200]));
+  });
+
   it('rejects cross-site requests from browsers and foreign origins with a cookie', async () => {
     const body = { email: 'x@example.com', password: 'whatever pass' };
     const crossSite = { origin: 'https://evil.example', 'sec-fetch-site': 'cross-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty' };
