@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { handleFavorites, type FavoritesDeps, type FavoritesStore } from '@/lib/account/favorites';
 import { capturedEmails, clearCapturedEmails, emailMode, EmailUnavailableError, sendEmail } from '@/lib/account/mail';
 import { mailLink, mailLocale, renderMail } from '@/lib/account/mail-templates';
+import { AUTH_RATE_RULES } from '@/lib/account/auth';
 import { createLimiter } from '@/lib/account/rate-limit';
 import { FAVORITES_MAX, isFavoriteRef, type Favorite } from '@/lib/account/shared';
 
@@ -56,6 +57,19 @@ describe('account emails', () => {
     vi.stubEnv('SMTP_HOST', 'host.docker.internal');
     vi.stubEnv('EMAIL_FROM_ADDRESS', 'noreply@riftden.com');
     expect(emailMode()).toBe('smtp');
+  });
+});
+
+describe('auth rate rules', () => {
+  it('lets every page check the session without hitting the shared 100 per minute', () => {
+    expect(AUTH_RATE_RULES['/get-session']).toEqual({ window: 60, max: 600 });
+  });
+
+  it('keeps sign-in, sign-up and password reset strict', () => {
+    const perMinute = (rule: { window: number; max: number }) => (rule.max * 60) / rule.window;
+    for (const path of ['/sign-in/email', '/sign-up/email', '/request-password-reset', '/reset-password', '/send-verification-email', '/change-password', '/delete-user'] as const) {
+      expect(perMinute(AUTH_RATE_RULES[path])).toBeLessThanOrEqual(5);
+    }
   });
 });
 
