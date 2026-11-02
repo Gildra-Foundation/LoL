@@ -1,5 +1,6 @@
 """Process one champion: download its WADs, build glb models, chroma textures and
 voice-over, then delete the WADs. Returns a JSON-able state for the manifest."""
+from cdtb.binfile import compute_binhash
 import json
 import os
 import re
@@ -177,7 +178,7 @@ class ChampionJob:
                     textures.append({"material": mat, "tex": p})
             default = self.tex_file(spec["default"]) if spec["default"] else None
             anims = []
-            for name, h in spec["anims"]:
+            for name, h, _events in spec["anims"]:
                 p = self.raw_file(h, "anm")
                 if p:
                     anims.append({"name": name, "path": p})
@@ -214,9 +215,27 @@ class ChampionJob:
                 continue
             if res.get("animErrors"):
                 st["animErrors"] = res["animErrors"]
-            materials = [m for m in res.get("materials", []) if m.lower() not in {h.lower() for h in spec["hide"]}]
+            # hidden submeshes stay in the model: animation events show them (props, Nunu's snowman, swaps)
+            materials = list(dict.fromkeys(res.get("materials", [])))
+            hide = {h.lower() for h in spec["hide"]}
+            by_hash = {compute_binhash(m): m for m in materials}
+            events = {}
+            for name, _h, evs in spec["anims"]:
+                if name not in res.get("anims", []):
+                    continue
+                out = []
+                for ev in evs:
+                    show = [by_hash[h] for h in ev["show"] if h in by_hash]
+                    hide_now = [by_hash[h] for h in ev["hide"] if h in by_hash]
+                    if show or hide_now:
+                        # frames are 30 fps in League clips
+                        out.append({"start": round(ev["start"] / 30, 3), "end": None if ev["end"] is None else round(ev["end"] / 30, 3),
+                                    "show": show, "hide": hide_now})
+                if out:
+                    events[name] = out
             base_tex = {m: spec["overrides"].get(m, spec["default"]) for m in materials}
-            extras = {"baseMaterials": [m for m in materials if base_tex[m] == spec["default"]], "chromas": {}}
+            extras = {"baseMaterials": [m for m in materials if base_tex[m] == spec["default"]], "chromas": {},
+                      "hidden": [m for m in materials if m.lower() in hide], "events": events}
             for cid, (cdef, cover) in chroma_tex.get(sid, {}).items():
                 swap = {}
                 for m in materials:
@@ -237,7 +256,7 @@ class ChampionJob:
                 "id": str(sid),
                 "in": os.path.join(self.work, "glb", f"{sid}.glb"),
                 "out": os.path.join(self.work, "opt", f"{sid}.glb"),
-                "hide": spec["hide"],
+                "animsOut": os.path.join(self.work, "opt", f"{sid}.anims.glb"),
                 "extras": extras,
             })
         for (cid, h), rel in chroma_files.items():
@@ -265,6 +284,11 @@ class ChampionJob:
             shutil.move(os.path.join(self.work, "opt", f"{sid}.glb"), dst + ".part")
             os.replace(dst + ".part", dst)
             st["model"] = {"glb": rel, "animations": r["animations"], "bytes": r["bytes"]}
+            if r.get("animsBytes"):
+                anims_rel = f"models/{sid}.anims.glb"
+                shutil.move(os.path.join(self.work, "opt", f"{sid}.anims.glb"), os.path.join(self.out, anims_rel) + ".part")
+                os.replace(os.path.join(self.out, anims_rel) + ".part", os.path.join(self.out, anims_rel))
+                st["model"].update({"anims": anims_rel, "animsBytes": r["animsBytes"]})
 
     # ---- voice-over -----------------------------------------------------
     def voice(self):
