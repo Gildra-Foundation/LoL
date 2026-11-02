@@ -69,30 +69,41 @@ static class SkinGltf
         MemoryAccessor.SanitizeVertexAttributes(vertices);
         RemapJoints(vertices, influenceLookup);
 
+        // vertices with garbage coordinates (Coven Janna: ~1e38) are dropped with their triangles
+        var positions = mesh.VerticesView.GetAccessor(ElementName.Position).AsVector3Array();
         foreach (SkinnedMeshRange range in mesh.Ranges)
         {
-            IndexArray indices = mesh.Indices.Slice(range.StartIndex, range.IndexCount);
-            if (indices.Count == 0) continue;
+            IndexArray all = mesh.Indices.Slice(range.StartIndex, range.IndexCount);
+            if (all.Count == 0) continue;
             int min = int.MaxValue, max = -1;
-            for (int i = 0; i < indices.Count; i++)
+            for (int i = 0; i < all.Count; i++)
             {
-                int v = (int)indices[i];
+                int v = (int)all[i];
                 if (v < min) min = v;
                 if (v > max) max = v;
             }
             // Indices are usually global (inside the range's vertex window); some skins store them
             // relative to the range instead. Anything else: slice what the indices actually touch.
-            int start = range.StartVertex, count = range.VertexCount, rebase = start;
-            if (min >= start && max < start + count) { }
-            else if (max < count) rebase = 0;
-            else { start = min; count = max - min + 1; rebase = min; }
+            int start = range.StartVertex, count = range.VertexCount, offset = 0;
+            if (min >= start && max < start + count) offset = -start;
+            else if (max < count) offset = 0;
+            else { start = min; count = max - min + 1; offset = -min; }
+            // stored index → local index in the slice: idx + offset; → global vertex id: idx + offset + start
+            var indices = new List<int>(all.Count);
+            for (int i = 0; i + 2 < all.Count; i += 3)
+            {
+                int x = (int)all[i] + offset, y = (int)all[i + 1] + offset, z = (int)all[i + 2] + offset;
+                if (ValidPosition(positions[x + start]) && ValidPosition(positions[y + start]) && ValidPosition(positions[z + start]))
+                    indices.AddRange(new[] { x, y, z });
+            }
+            if (indices.Count == 0) continue;
 
             MemoryAccessor index = new(
                 new(new byte[indices.Count * 4]),
                 new("INDEX", 0, indices.Count, 0, DimensionType.SCALAR, EncodingType.UNSIGNED_INT));
             IntegerArray indexArray = index.AsIntegerArray();
             for (int i = 0; i < indices.Count; i++)
-                indexArray[i] = (uint)((int)indices[i] - rebase);
+                indexArray[i] = (uint)indices[i];
 
             MemoryAccessor[] slice = vertices.Select(x => new MemoryAccessor(x.Data, x.Attribute.Slice(start, count))).ToArray();
             MemoryAccessor.VerifyVertexIndices(index, (uint)count);
@@ -116,7 +127,7 @@ static class SkinGltf
             switch (element.Name)
             {
                 case ElementName.Position:
-                    accessor.AsVector3Array().Fill(source.AsVector3Array().ToArray().Select(v => Finite(v) ? v : Vector3.Zero));
+                    accessor.AsVector3Array().Fill(source.AsVector3Array().ToArray().Select(v => ValidPosition(v) ? v : Vector3.Zero));
                     break;
                 case ElementName.BlendWeight:
                     accessor.AsVector4Array().Fill(source.AsVector4Array().ToArray().Select(SanitizeWeights));
@@ -321,5 +332,6 @@ static class SkinGltf
     }
 
     static bool Finite(Quaternion q) => float.IsFinite(q.X) && float.IsFinite(q.Y) && float.IsFinite(q.Z) && float.IsFinite(q.W) && q.LengthSquared() > 1e-8f;
+    static bool ValidPosition(Vector3 v) => Finite(v) && Math.Abs(v.X) < 1e5f && Math.Abs(v.Y) < 1e5f && Math.Abs(v.Z) < 1e5f;
     static bool Finite(Vector3 v) => float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z);
 }
