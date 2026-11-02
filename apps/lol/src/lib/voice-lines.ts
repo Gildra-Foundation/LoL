@@ -50,19 +50,21 @@ export const VOICE_LABELS = defineMessages({
 });
 
 /** «JinxSkin04» → «Jinx, образ 4»; «MoveFirstAllyStarGuardian» → «союзник: Star Guardian». */
-function target(raw: string, lang: Locale): string {
+function target(raw: string, lang: Locale, names: Record<string, string>): string {
   const t = VOICE_LABELS[lang];
   if (!raw || raw === 'General' || raw === 'Standard') return '';
   if (t.multi[raw]) return t.multi[raw];
   const side = /^(Ally|Enemy)(.+)$/.exec(raw);
-  if (side) return `${side[1] === 'Ally' ? t.ally : t.enemy}: ${target(side[2], lang)}`;
+  if (side) return `${side[1] === 'Ally' ? t.ally : t.enemy}: ${target(side[2], lang, names)}`;
   const skin = /^(.+?)Skin0*(\d+)$/.exec(raw);
   const words = (s: string) => s.replace(/([a-z])([A-Z])/g, '$1 $2');
-  return skin ? `${words(skin[1])}, ${t.skin(Number(skin[2]))}` : words(raw);
+  // имя чемпиона в событии — его id из Data Dragon («Ornn»): показываем имя на языке страницы
+  const name = (id: string) => names[id] ?? words(id);
+  return skin ? `${name(skin[1])}, ${t.skin(Number(skin[2]))}` : name(raw);
 }
 
-/** Группа и уточнение реплики по имени события. */
-export function voiceLine(event: string | undefined, lang: Locale): { group: VoiceGroup; detail: string } {
+/** Группа и уточнение реплики по имени события; names — имена чемпионов по id на языке страницы. */
+export function voiceLine(event: string | undefined, lang: Locale, names: Record<string, string> = {}): { group: VoiceGroup; detail: string } {
   if (!event) return { group: 'other', detail: '' };
   const e = event.replace(/(2D|3D)/, '');
   const spell = /(Q|W|E|R|Passive|BasicAttack\d*)_cast/.exec(event)?.[1];
@@ -86,8 +88,8 @@ export function voiceLine(event: string | undefined, lang: Locale): { group: Voi
   for (const [re, group] of rules) {
     const m = re.exec(e);
     if (!m) continue;
-    const detail = /^TauntResponse/.test(e) ? VOICE_LABELS[lang].tauntResponse : target(m[1], lang);
+    const detail = /^TauntResponse/.test(e) ? VOICE_LABELS[lang].tauntResponse : target(m[1], lang, names);
     return { group, detail };
   }
-  return { group: 'other', detail: target(e, lang) };
+  return { group: 'other', detail: target(e, lang, names) };
 }

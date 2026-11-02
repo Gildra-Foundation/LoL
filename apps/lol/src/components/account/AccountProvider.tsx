@@ -44,7 +44,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refresh = useCallback(async () => {
-    const result = await api.session();
+    let result = await api.session();
+    // лимит запросов или сбой сети — это не выход из аккаунта: повторяем один раз, а не показываем «Войти»
+    if (result.status === 429 || result.status === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      result = await api.session();
+    }
     if (result.status === 503) {
       setStatus('disabled');
       return;

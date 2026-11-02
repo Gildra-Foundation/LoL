@@ -10,7 +10,7 @@ import { SkinViewer } from '@/components/skins/SkinViewer';
 import { Tag } from '@rift/engine/ui/Tag';
 import { formatDate, plural } from '@rift/engine/lib/format';
 import { championHref } from '@/lib/assets';
-import { getChampion } from '@/lib/champions';
+import { getChampion, getChampions } from '@/lib/champions';
 import { DEFAULT_LOCALE, alternates, defineMessages, langOf, ogLocale, type Locale } from '@/lib/i18n';
 import { RARITIES } from '@/lib/labels';
 import { breadcrumbData } from '@/lib/seo';
@@ -177,7 +177,7 @@ export default async function SkinPage({ params }: Params) {
               </Tag>
             )}
             {s.legacy && <Tag>{t.legacy}</Tag>}
-            <FavoriteButton kind="skin" id={s.id} />
+            <FavoriteButton kind="skin" id={s.id} tag />
             {lines.map((l) => (
               <Tag key={l.id} href={lineHref(l.slug)}>
                 {l.name}
@@ -195,7 +195,7 @@ export default async function SkinPage({ params }: Params) {
             chromas={s.chromas}
             animated={s.video.splash}
           />
-          <SkinMedia id={s.id} chromas={s.chromas} />
+          <SkinMedia id={s.id} chromas={s.chromas} championNames={Object.fromEntries(getChampions(lang).map((c) => [c.id, c.name]))} />
           {s.description && <p className={styles.description}>{s.description}</p>}
           {s.features.length > 0 && (
             <section className={styles.sub}>

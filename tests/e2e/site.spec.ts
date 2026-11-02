@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-for (const path of ['/', '/champions', '/champions/garen', '/items', '/builds', '/methodology', '/skins', '/skins/star-guardian-ahri']) {
+for (const path of ['/', '/champions', '/champions/garen', '/items', '/builds', '/methodology', '/skins', '/skins/star-guardian-ahri', '/stats', '/compare', '/duel', '/privacy']) {
   test(`page renders without errors or horizontal overflow: ${path}`, async ({ page }, testInfo) => {
     const errors: string[] = []; page.on('pageerror', (error) => errors.push(error.message));
     const response = await page.goto(path);
@@ -75,6 +75,19 @@ test('skin catalog filters persist in the URL and open a skin page', async ({ pa
   const chromas = page.getByRole('group', { name: 'Хромы' });
   await chromas.getByRole('button').nth(1).click();
   await expect(chromas.getByRole('button').nth(1)).toHaveAttribute('aria-pressed', 'true');
+});
+test('skin set heading and art tabs are not covered by the hero background', async ({ page }) => {
+  // фон шапки выше самой шапки — проверяем, что он не перехватывает клики по следующему блоку
+  const onTop = (selector: string) => page.locator(selector).first().evaluate((el) => {
+    el.scrollIntoView({ block: 'center' });
+    const r = el.getBoundingClientRect();
+    const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return Boolean(top && (el === top || el.contains(top)));
+  });
+  await page.goto('/skins/universes/piltover-customs');
+  expect(await onTop('main h2')).toBe(true);
+  await page.goto('/skins/arcana-aurora');
+  expect(await onTop('main [role="group"] button[aria-pressed]')).toBe(true);
 });
 test('comparison changes stats and preserves selected level', async ({ page }) => {
   await page.goto('/compare?a=garen&b=darius');

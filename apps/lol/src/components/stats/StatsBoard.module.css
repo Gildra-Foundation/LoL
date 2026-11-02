@@ -1,5 +1,7 @@
 .board {
   display: grid;
+  /* minmax(0, …): широкая таблица прокручивается в своём блоке, а не растягивает страницу на телефоне */
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 

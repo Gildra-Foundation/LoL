@@ -156,7 +156,8 @@ export function StatsSection({ name, total, among, series, rows, derived }: Stat
         <p>{t.lead(total, among)}</p>
       </div>
 
-      <div className={styles.tableWrap}>
+      {/* на телефоне таблица прокручивается вбок — область доступна с клавиатуры */}
+      <div className={styles.tableWrap} tabIndex={0} role="region" aria-label={t.title(level)}>
         <table className={styles.sheet}>
           {head}
           <tbody>
@@ -168,7 +169,7 @@ export function StatsSection({ name, total, among, series, rows, derived }: Stat
       </div>
 
       <h3 className={styles.sub}>{t.derived}</h3>
-      <div className={styles.tableWrap}>
+      <div className={styles.tableWrap} tabIndex={0} role="region" aria-label={t.derived}>
         <table className={styles.sheet}>
           {head}
           <tbody>
