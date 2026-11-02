@@ -44,7 +44,11 @@ PLAYWRIGHT_BASE_URL=http://127.0.0.1:3015 npm run test:e2e
 docker compose -f deploy/compose.yml up -d --wait db
 SWITCHED=true
 RIFTDEN_IMAGE="$IMAGE" docker compose -f deploy/compose.yml up -d --no-deps web
-# Reload upstream DNS after container replacement.
+# nginx.conf смонтирован файлом: после git checkout контейнер видит старую копию — тогда пересоздаём nginx.
+# Иначе достаточно reload (заново резолвит адрес web после замены контейнера).
+if ! docker exec riftden-nginx cat /etc/nginx/conf.d/default.conf | cmp -s - deploy/nginx.conf; then
+  docker compose -f deploy/compose.yml up -d --no-deps --force-recreate nginx
+fi
 if ! docker exec riftden-nginx nginx -s reload; then
   restore
   exit 1

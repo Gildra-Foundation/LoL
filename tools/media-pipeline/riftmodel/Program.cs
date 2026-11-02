@@ -142,7 +142,7 @@ static class Program
             Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(job.@out)));
             try
             {
-                mesh.ToGltf(rig, textures, anims).SaveGLB(job.@out);
+                SkinGltf.ToGltf(mesh, rig, textures, anims).SaveGLB(job.@out);
             }
             catch (Exception e) when (anims.Count > 0)
             {
@@ -153,21 +153,23 @@ static class Program
                 {
                     try
                     {
-                        mesh.ToGltf(rig, new List<(string, Stream)>(), good.Append(a));
+                        SkinGltf.ToGltf(mesh, rig, new List<(string, Stream)>(), good.Append(a));
                         good.Add(a);
                     }
                     catch (Exception e2) { res.animErrors[a.Item1] = e2.GetType().Name + ": " + e2.Message; }
                 }
                 foreach (var t in textures) t.Item2.Seek(0, SeekOrigin.Begin);
                 res.anims = good.Select(g => g.Item1).ToList();
-                mesh.ToGltf(rig, textures, good).SaveGLB(job.@out);
+                SkinGltf.ToGltf(mesh, rig, textures, good).SaveGLB(job.@out);
             }
             res.ok = true;
         }
         catch (Exception e)
         {
             res.ok = false;
-            res.error = e.GetType().Name + ": " + e.Message;
+            // first stack frame tells which part of the model broke (mesh, rig, animation)
+            string at = e.StackTrace?.Split('\n').FirstOrDefault()?.Trim();
+            res.error = e.GetType().Name + ": " + e.Message + (at is null ? "" : " | " + at);
         }
         return res;
     }
