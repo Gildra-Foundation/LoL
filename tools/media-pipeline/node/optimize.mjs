@@ -37,13 +37,10 @@ function dropConstantChannels(doc, eps = 1e-4) {
       if (!node || !sampler) continue;
       const path = ch.getTargetPath();
       const rest = path === 'rotation' ? node.getRotation() : path === 'translation' ? node.getTranslation() : node.getScale();
-      const out = sampler.getOutput();
-      const el = [];
-      let constant = true;
-      for (let i = 0; i < out.getCount() && constant; i++) {
-        out.getElement(i, el);
-        constant = el.every((v, k) => Math.abs(v - rest[k]) < eps);
-      }
+      const arr = sampler.getOutput().getArray();
+      const n = rest.length;
+      let constant = !!arr;
+      for (let i = 0; constant && i < arr.length; i++) constant = Math.abs(arr[i] - rest[i % n]) < eps;
       if (constant) {
         ch.dispose();
         sampler.dispose();
