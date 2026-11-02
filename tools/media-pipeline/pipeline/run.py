@@ -222,7 +222,7 @@ def build(args):
         else:
             st = cst["skins"].get(str(sid), {})
             if "model" in st:
-                entry["model"] = st["model"]
+                entry["model"] = dict(st["model"], **({"fx": st["fx"]} if st.get("fx") else {}))
             else:
                 failures.append({"id": sid, "name": name, "stage": "model", "reason": st.get("modelError", "unknown")})
             if st.get("animErrors"):
@@ -277,6 +277,54 @@ def build(args):
     return out
 
 
+# ---------------------------------------------------------------- effects
+def effects(args):
+    """Add particle effects to an already built patch (models/fx/*), without rebuilding models."""
+    patch = args.patch or cdragon_patch()[0]
+    final = os.path.join(args.out, patch)
+    man_path = os.path.join(final, "manifest.json")
+    with open(man_path) as f:
+        manifest = json.load(f)
+    _, manifest_url = rman_fetch.live_manifest_url()
+    champs = json.loads(images.cdragon_get(f"{CDRAGON}/{patch}/plugins/rcp-be-lol-game-data/global/default/v1/champion-summary.json"))
+    alias = {c["id"]: c["alias"] for c in champs if c["id"] > 0}
+    keep = {a.lower() for a in args.champions.split(",")} if args.champions else None
+    by_champ = {}
+    for sid in manifest["skins"]:
+        sid_i = int(sid)
+        cid = sid_i // 1000
+        if cid not in alias or (keep and alias[cid].lower() not in keep):
+            continue
+        if not manifest["skins"][sid].get("model"):
+            continue
+        by_champ.setdefault(cid, {"id": cid, "alias": alias[cid], "skins": [], "chromas": []})["skins"].append({"id": sid_i, "num": sid_i % 1000})
+    work = os.path.join(args.cache, "work")
+    ctx_base = {"out": final, "work": work, "cache": args.cache, "manifest_url": manifest_url, "effects_only": True,
+                "binhashes_path": load_binhashes(args.cache), "audio_threads": 1}
+    rman_fetch.load_manifest(manifest_url, args.cache)
+    log(f"effects for {len(by_champ)} champions into {final}")
+    with_fx = 0
+    with ProcessPoolExecutor(args.workers, mp_context=multiprocessing.get_context("spawn"),
+                             initializer=_init_worker, initargs=(ctx_base,)) as ex:
+        futs = [ex.submit(_champion_worker, c) for c in by_champ.values()]
+        for n, fut in enumerate(as_completed(futs), 1):
+            cid, st, err = fut.result()
+            if err:
+                log(f"[{n}/{len(futs)}] {alias[cid]} FAILED: {err.splitlines()[0]}")
+                continue
+            got = 0
+            for sid, s in st["skins"].items():
+                entry = manifest["skins"].get(sid)
+                if entry and entry.get("model") and s.get("fx"):
+                    entry["model"]["fx"] = s["fx"]
+                    _write_json(os.path.join(final, "skins", f"{sid}.json"), entry)
+                    got += 1
+            with_fx += got
+            log(f"[{n}/{len(futs)}] {alias[cid]} effects {got}/{len(st['skins'])}")
+    _write_json(man_path, manifest)
+    log(f"done: {with_fx} skins with effects")
+
+
 # ---------------------------------------------------------------- update
 def cleanup(root):
     """Delete patch folders older than the one the site uses (SITE_PATCH)."""
@@ -311,7 +359,7 @@ def update(args):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("command", choices=["build", "update", "cleanup"])
+    ap.add_argument("command", choices=["build", "update", "cleanup", "effects"])
     ap.add_argument("--out", default="/out")
     ap.add_argument("--cache", default="/cache")
     ap.add_argument("--patch")
@@ -328,6 +376,8 @@ def main():
     os.makedirs(args.cache, exist_ok=True)
     if args.command == "build":
         build(args)
+    elif args.command == "effects":
+        effects(args)
     elif args.command == "update":
         update(args)
     else:

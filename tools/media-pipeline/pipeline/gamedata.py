@@ -62,6 +62,38 @@ T_ATOMIC = compute_binhash("AtomicClipData")
 T_SEQUENCER = compute_binhash("SequencerClipData")
 T_SKIN = compute_binhash("SkinCharacterDataProperties")
 T_MATERIAL = compute_binhash("StaticMaterialDef")
+T_SUBMESH_EVENT = compute_binhash("SubmeshVisibilityEventData")
+
+
+def _submesh_hashes(values):
+    out = []
+    for v in values or []:
+        if isinstance(v, str):
+            out.append(compute_binhash(v))
+        elif hasattr(v, "h"):
+            out.append(v.h)
+        elif isinstance(v, int):
+            out.append(v)
+    return out
+
+
+def clip_events(clip):
+    """Submesh show/hide events of an atomic clip: [{start, end, show, hide}] with frame numbers."""
+    m = clip.get("mEventDataMap")
+    if m is None:
+        return []
+    vals = m.value.values.values() if isinstance(m.value.values, dict) else m.value.values
+    events = []
+    for ev in vals:
+        if getattr(getattr(ev, "type", None), "h", None) != T_SUBMESH_EVENT:
+            continue
+        show, hide = _submesh_hashes(ev.getv("mShowSubmeshList")), _submesh_hashes(ev.getv("mHideSubmeshList"))
+        if not show and not hide:
+            continue
+        end = ev.getv("mEndFrame")
+        events.append({"start": float(ev.getv("mStartFrame") or 0.0), "end": float(end) if end is not None else None,
+                       "show": show, "hide": hide})
+    return events
 
 # output clip name -> exact candidates (tried first), then a fuzzy regex
 ANIMATIONS = [
@@ -203,7 +235,10 @@ class ChampionData:
 
     # ---- animations -----------------------------------------------------
     def animation_files(self, skin, binhashes: BinHashes):
-        """[(output name, anm path hash)] picked from the skin animation graph."""
+        """[(output name, anm path hash, submesh events, particle events)] picked from the skin animation graph.
+
+        Events are SubmeshVisibilityEventData of the atomic clip: frames plus FNV hashes of the
+        submeshes to show/hide (weapons, props, Nunu's snowman, teeth and claws swaps)."""
         props = skin.get("skinAnimationProperties")
         if props is None:
             return []
@@ -230,7 +265,10 @@ class ChampionData:
                 if p is None:
                     return None
                 ph = p.value.h if hasattr(p.value, "h") else path_hash(p.value)
-                return ph if self.wad.has(ph) else None
+                if not self.wad.has(ph):
+                    return None
+                import vfx  # late: vfx imports gamedata
+                return (ph, clip_events(clip), vfx.particle_events(clip))
             refs = []
             for f in clip.fields:
                 _walk_hashes(f.value, refs)
@@ -258,9 +296,9 @@ class ChampionData:
                     found = resolve(compute_binhash(n))
                     if found:
                         break
-            if found and found not in used:
-                used.add(found)
-                picked.append((out, found))
+            if found and found[0] not in used:
+                used.add(found[0])
+                picked.append((out, found[0], found[1], found[2]))
         return picked
 
     # ---- model ----------------------------------------------------------

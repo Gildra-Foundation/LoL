@@ -1,5 +1,6 @@
 """Process one champion: download its WADs, build glb models, chroma textures and
 voice-over, then delete the WADs. Returns a JSON-able state for the manifest."""
+from cdtb.binfile import compute_binhash
 import json
 import os
 import re
@@ -10,6 +11,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import gamedata as gd
+import vfx
 import rman_fetch
 import wwise
 
@@ -73,8 +75,12 @@ class ChampionJob:
                     self.skin_state(s["id"])["modelError"] = "no champion WAD in the live game client"
                 return self.state
             self.data = gd.ChampionData(self.main, self.alias)
-            self.models()
-            self.voice()
+            if self.ctx.get("effects_only"):
+                self.effects()
+            else:
+                self.models()
+                self.effects()
+                self.voice()
         finally:
             for w in getattr(self, "wads", {}).values():
                 w.close()
@@ -89,6 +95,8 @@ class ChampionJob:
         wanted = {"main": base + ".wad.client"}
         for lang, loc in LANGS.items():
             wanted[lang] = f"{base}.{loc.lower()}.wad.client"
+        if self.ctx.get("effects_only"):
+            wanted = {"main": wanted["main"]}
         for key, name in wanted.items():
             pf = files.get(name)
             if pf is None:
@@ -144,6 +152,7 @@ class ChampionJob:
                 st["modelWarning"] = "no animation graph clips"
             specs[sid] = spec
         self.skin_entries = entries
+        self.specs = specs
 
         # chroma textures relative to the parent skin's materials
         chroma_tex = {}  # sid -> {cid: {material: tex hash}}
@@ -177,7 +186,7 @@ class ChampionJob:
                     textures.append({"material": mat, "tex": p})
             default = self.tex_file(spec["default"]) if spec["default"] else None
             anims = []
-            for name, h in spec["anims"]:
+            for name, h, _events, _fx in spec["anims"]:
                 p = self.raw_file(h, "anm")
                 if p:
                     anims.append({"name": name, "path": p})
@@ -214,9 +223,27 @@ class ChampionJob:
                 continue
             if res.get("animErrors"):
                 st["animErrors"] = res["animErrors"]
-            materials = [m for m in res.get("materials", []) if m.lower() not in {h.lower() for h in spec["hide"]}]
+            # hidden submeshes stay in the model: animation events show them (props, Nunu's snowman, swaps)
+            materials = list(dict.fromkeys(res.get("materials", [])))
+            hide = {h.lower() for h in spec["hide"]}
+            by_hash = {compute_binhash(m): m for m in materials}
+            events = {}
+            for name, _h, evs, _fx in spec["anims"]:
+                if name not in res.get("anims", []):
+                    continue
+                out = []
+                for ev in evs:
+                    show = [by_hash[h] for h in ev["show"] if h in by_hash]
+                    hide_now = [by_hash[h] for h in ev["hide"] if h in by_hash]
+                    if show or hide_now:
+                        # frames are 30 fps in League clips
+                        out.append({"start": round(ev["start"] / 30, 3), "end": None if ev["end"] is None else round(ev["end"] / 30, 3),
+                                    "show": show, "hide": hide_now})
+                if out:
+                    events[name] = out
             base_tex = {m: spec["overrides"].get(m, spec["default"]) for m in materials}
-            extras = {"baseMaterials": [m for m in materials if base_tex[m] == spec["default"]], "chromas": {}}
+            extras = {"baseMaterials": [m for m in materials if base_tex[m] == spec["default"]], "chromas": {},
+                      "hidden": [m for m in materials if m.lower() in hide], "events": events}
             for cid, (cdef, cover) in chroma_tex.get(sid, {}).items():
                 swap = {}
                 for m in materials:
@@ -237,7 +264,7 @@ class ChampionJob:
                 "id": str(sid),
                 "in": os.path.join(self.work, "glb", f"{sid}.glb"),
                 "out": os.path.join(self.work, "opt", f"{sid}.glb"),
-                "hide": spec["hide"],
+                "animsOut": os.path.join(self.work, "opt", f"{sid}.anims.glb"),
                 "extras": extras,
             })
         for (cid, h), rel in chroma_files.items():
@@ -265,6 +292,76 @@ class ChampionJob:
             shutil.move(os.path.join(self.work, "opt", f"{sid}.glb"), dst + ".part")
             os.replace(dst + ".part", dst)
             st["model"] = {"glb": rel, "animations": r["animations"], "bytes": r["bytes"]}
+            if r.get("animsBytes"):
+                anims_rel = f"models/{sid}.anims.glb"
+                shutil.move(os.path.join(self.work, "opt", f"{sid}.anims.glb"), os.path.join(self.out, anims_rel) + ".part")
+                os.replace(os.path.join(self.out, anims_rel) + ".part", os.path.join(self.out, anims_rel))
+                st["model"].update({"anims": anims_rel, "animsBytes": r["animsBytes"]})
+
+    # ---- particle effects ---------------------------------------------
+    def effects(self):
+        """Particle effects fired by the exported clips: models/fx/<sid>.json, textures and meshes."""
+        bh = self.ctx["binhashes"]
+        textures, meshes = {}, {}
+        for s in self.champ["skins"]:
+            sid = s["id"]
+            st = self.skin_state(sid)
+            try:
+                skin = getattr(self, "skin_entries", {}).get(sid) or self.data.skin_entry(s["num"])
+                spec = getattr(self, "specs", {}).get(sid) or (self.data.model_spec(skin, bh)[0] if skin is not None else None)
+            except Exception as e:
+                st["fxError"] = f"skin data: {e}"
+                continue
+            if skin is None or spec is None:
+                continue
+            clips = {name: fx for name, _h, _ev, fx in spec["anims"] if fx}
+            if not clips:
+                continue
+            try:
+                fx, tex, mesh = vfx.skin_effects(self.data, skin, clips)
+            except Exception as e:
+                st["fxError"] = f"effects: {e}"
+                continue
+            if not fx:
+                continue
+            rel = f"models/fx/{sid}.json"
+            _write(os.path.join(self.out, rel), json.dumps(fx, separators=(",", ":")).encode())
+            st["fx"] = rel
+            textures.update(tex)
+            meshes.update(mesh)
+        # textures: .tex/.dds from the champion WAD -> png -> webp (alpha kept: sprites are cut-outs)
+        tex_jobs, opt_jobs = [], []
+        for path, rel in textures.items():
+            dst = os.path.join(self.out, rel)
+            h = gd.path_hash(path)
+            if os.path.exists(dst) or not self.main.has(h):
+                continue
+            src = self.tex_file(h)
+            if not src:
+                continue
+            png = os.path.join(self.work, "fxpng", f"{h:016x}.png")
+            tex_jobs.append({"id": f"fxtex:{h:016x}", "pngs": [{"tex": src, "png": png}]})
+            opt_jobs.append({"id": f"fxtex:{h:016x}", "png": png, "webp": dst})
+        if tex_jobs:
+            os.makedirs(os.path.join(self.out, "models", "fx", "tex"), exist_ok=True)
+            _run_jsonl([RIFTMODEL, "batch"], tex_jobs, self.work, timeout=1800)
+            _run_jsonl([NODE, OPTIMIZE], [j for j in opt_jobs if os.path.exists(j["png"])], self.work, timeout=1800)
+        # meshes: .scb/.sco -> glb
+        pairs = []
+        for path, rel in meshes.items():
+            dst = os.path.join(self.out, rel)
+            h = gd.path_hash(path)
+            if os.path.exists(dst) or not self.main.has(h):
+                continue
+            data = self.main.read(h)
+            if not data:
+                continue
+            src = _write(os.path.join(self.work, "fxmesh", f"{h:016x}{os.path.splitext(path)[1]}"), data)
+            pairs.append(f"{src}\t{dst}")
+        if pairs:
+            os.makedirs(os.path.join(self.out, "models", "fx", "mesh"), exist_ok=True)
+            tsv = _write(os.path.join(self.work, "fxmesh", "pairs.tsv"), "\n".join(pairs).encode())
+            subprocess.run([RIFTMODEL, "scb2glb", tsv], capture_output=True, text=True, timeout=1800)
 
     # ---- voice-over -----------------------------------------------------
     def voice(self):
