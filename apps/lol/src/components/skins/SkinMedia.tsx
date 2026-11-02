@@ -20,6 +20,7 @@ const MESSAGES = defineMessages({
     loading: 'Загружаем модель…',
     error: 'Модель не загрузилась.',
     animations: 'Анимации',
+    effects: 'Эффекты',
     rotate: 'Модель образа, её можно вращать',
     voice: 'Озвучка',
     voiceLead: (n: number) => `${n} ${plural(n, ['реплика', 'реплики', 'реплик'], 'ru')} из игры.`,
@@ -40,6 +41,7 @@ const MESSAGES = defineMessages({
     loading: 'Loading the model…',
     error: 'The model could not load.',
     animations: 'Animations',
+    effects: 'Effects',
     rotate: 'Skin model you can rotate',
     voice: 'Voice lines',
     voiceLead: (n: number) => `${n} ${plural(n, ['line', 'lines', 'lines'], 'en')} from the game.`,
@@ -64,7 +66,7 @@ interface VoiceLine {
 /** Запись медиа-конвейера для одного образа (tools/media-pipeline). */
 export interface MediaEntry {
   chromas?: Record<string, { image?: string; texture?: string }>;
-  model?: { glb: string; animations: string[]; bytes?: number; anims?: string; animsBytes?: number };
+  model?: { glb: string; animations: string[]; bytes?: number; anims?: string; animsBytes?: number; fx?: string };
   vo?: Partial<Record<Locale, VoiceLine[]>>;
   voFrom?: number;
 }
@@ -166,11 +168,12 @@ export function SkinMedia({
             <ModelViewer
               url={base + entry.model.glb}
               animsUrl={entry.model.anims ? base + entry.model.anims : null}
+              fxUrl={entry.model.fx ? base + entry.model.fx : null}
               animations={entry.model.animations}
               animationLabel={(name) => t.anims[name.toLowerCase()] ?? name}
               base={base}
               chroma={chroma === null ? null : String(chroma)}
-              labels={{ loading: t.loading, error: t.error, animations: t.animations, rotate: t.rotate }}
+              labels={{ loading: t.loading, error: t.error, animations: t.animations, rotate: t.rotate, effects: t.effects }}
             />
           ) : (
             <button type="button" className={styles.load} onClick={() => setShow3d(true)}>

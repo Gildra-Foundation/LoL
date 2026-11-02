@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { ParticleFx, type FxData } from './particles';
 import styles from './SkinMedia.module.css';
 
 interface SubmeshEvent {
@@ -18,6 +19,8 @@ export interface ModelViewerProps {
   url: string;
   /** остальные анимации отдельным файлом: грузятся в фоне, когда модель уже на экране */
   animsUrl: string | null;
+  /** эффекты частиц образа (models/fx/<id>.json) */
+  fxUrl: string | null;
   /** порядок кнопок анимаций; имена клипов из glb */
   animations: string[];
   animationLabel: (name: string) => string;
@@ -25,11 +28,11 @@ export interface ModelViewerProps {
   base: string;
   /** id хромы: её текстуры берутся из gltf.userData.riftden.chromas; null — исходные */
   chroma: string | null;
-  labels: { loading: string; error: string; animations: string; rotate: string };
+  labels: { loading: string; error: string; animations: string; rotate: string; effects: string };
 }
 
 /** 3D-модель образа: вращение мышью или пальцем, колесо — приближение, кнопки — анимации из игры. */
-export default function ModelViewer({ url, animsUrl, animations, animationLabel, base, chroma, labels }: ModelViewerProps) {
+export default function ModelViewer({ url, animsUrl, fxUrl, animations, animationLabel, base, chroma, labels }: ModelViewerProps) {
   const host = useRef<HTMLDivElement>(null);
   const scene = useRef<{
     mixer: THREE.AnimationMixer;
@@ -38,11 +41,14 @@ export default function ModelViewer({ url, animsUrl, animations, animationLabel,
     chromas: Record<string, Record<string, string>>;
     /** видимость частей модели в момент t анимации: скрытые при появлении части и события клипа */
     showAt: (clip: string | null, t: number) => void;
+    fx: ParticleFx | null;
   } | null>(null);
   const currentRef = useRef<string | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [clips, setClips] = useState<string[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
+  const [hasFx, setHasFx] = useState(false);
+  const [fxOn, setFxOn] = useState(true);
 
   useEffect(() => {
     const el = host.current!;
@@ -178,7 +184,18 @@ export default function ModelViewer({ url, animsUrl, animations, animationLabel,
         });
         const chromas = extras.chromas ?? {};
         const loaded = [...gltf.animations];
-        scene.current = { mixer, clips: loaded, original, chromas, showAt };
+        scene.current = { mixer, clips: loaded, original, chromas, showAt, fx: null };
+        if (fxUrl) {
+          fetch(fxUrl)
+            .then((r) => (r.ok ? (r.json() as Promise<FxData>) : null))
+            .then((data) => {
+              if (!data || disposed || !scene.current) return;
+              scene.current.fx = new ParticleFx(root, world, base, data, bind.extent || Infinity);
+              scene.current.fx.start(currentRef.current);
+              setHasFx(Object.keys(data.events).length > 0);
+            })
+            .catch(() => undefined);
+        }
         setClips(ordered);
         setCurrent(start);
         setState('ready');
@@ -213,10 +230,13 @@ export default function ModelViewer({ url, animsUrl, animations, animationLabel,
       frame = requestAnimationFrame(tick);
       const s = scene.current;
       if (s) {
-        s.mixer.update(clock.getDelta());
+        const dt = Math.min(clock.getDelta(), 0.1);
+        s.mixer.update(dt);
         const name = currentRef.current;
         const clip = name ? s.clips.find((c) => c.name === name) : undefined;
-        s.showAt(name, clip ? s.mixer.existingAction(clip)?.time ?? 0 : 0);
+        const time = clip ? s.mixer.existingAction(clip)?.time ?? 0 : 0;
+        s.showAt(name, time);
+        s.fx?.update(dt, time);
       }
       controls.update();
       renderer.render(world, camera);
@@ -237,11 +257,12 @@ export default function ModelViewer({ url, animsUrl, animations, animationLabel,
           m.dispose();
         }
       });
+      scene.current?.fx?.dispose();
       renderer.dispose();
       renderer.domElement.remove();
       scene.current = null;
     };
-  }, [url, animsUrl, animations]);
+  }, [url, animsUrl, fxUrl, base, animations]);
 
   // анимация
   useEffect(() => {
@@ -252,7 +273,12 @@ export default function ModelViewer({ url, animsUrl, animations, animationLabel,
     if (!clip) return;
     s.mixer.stopAllAction();
     s.mixer.clipAction(clip).reset().fadeIn(0.2).play();
+    s.fx?.start(current);
   }, [current, state, clips]);
+
+  useEffect(() => {
+    if (scene.current?.fx) scene.current.fx.visible = fxOn;
+  }, [fxOn, hasFx]);
 
   // хрома: свои текстуры у перечисленных материалов (имя материала → файл)
   useEffect(() => {
@@ -298,6 +324,11 @@ export default function ModelViewer({ url, animsUrl, animations, animationLabel,
               {animationLabel(name)}
             </button>
           ))}
+          {hasFx && (
+            <button type="button" className={styles.fxToggle} aria-pressed={fxOn} onClick={() => setFxOn((on) => !on)}>
+              {labels.effects}
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -173,3 +173,7 @@
 .group .lines {
   padding-bottom: 12px;
 }
+
+.fxToggle {
+  margin-left: auto;
+}
