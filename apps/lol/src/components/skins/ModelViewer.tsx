@@ -62,13 +62,63 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
       (gltf) => {
         if (disposed) return;
         const root = gltf.scene;
+        // Модель в сцене одна, отсекать её по рамке незачем: three.js считает рамку один раз, и у образов,
+        // где первый кадр анимации сжат в точку, модель иначе пропадала навсегда.
+        root.traverse((o) => (o.frustumCulled = false));
         world.add(root);
+        const mixer = new THREE.AnimationMixer(root);
+        const names = gltf.animations.map((c) => c.name);
+        const ordered = [...animations.filter((a) => names.includes(a)), ...names.filter((n) => !animations.includes(n))];
+        // Размер модели в позе каждой анимации: у образов с превращениями ожидание бывает
+        // в «пустой» форме, тогда начинаем с первой анимации, где модель видна целиком.
+        const posed = (clip?: THREE.AnimationClip, at = 0.5) => {
+          mixer.stopAllAction();
+          if (clip) {
+            mixer.clipAction(clip).play();
+            mixer.setTime(clip.duration * at);
+          }
+          root.updateMatrixWorld(true);
+          const b = new THREE.Box3();
+          root.traverse((o) => {
+            const mesh = o as THREE.SkinnedMesh;
+            if (!mesh.isSkinnedMesh) return;
+            mesh.computeBoundingBox();
+            b.union(mesh.boundingBox!.clone().applyMatrix4(mesh.matrixWorld));
+          });
+          const s = b.getSize(new THREE.Vector3());
+          return { box: b, extent: [s.x, s.y, s.z].every(Number.isFinite) ? Math.max(s.x, s.y, s.z) : 0 };
+        };
+        // поза привязки — до любых анимаций: по ней кадр (анимации уводят спрятанные части далеко в сторону)
+        const rest = new Map<THREE.Object3D, [THREE.Vector3, THREE.Quaternion, THREE.Vector3]>();
+        root.traverse((o) => rest.set(o, [o.position.clone(), o.quaternion.clone(), o.scale.clone()]));
+        const bind = posed();
+        // анимация годится для старта, если модель видна во всех её моментах, а не только в середине
+        const boxes = new Map(
+          ordered.map((n) => {
+            const clip = gltf.animations.find((c) => c.name === n);
+            const samples = [0.05, 0.3, 0.55, 0.8].map((at) => posed(clip, at));
+            return [n, samples.reduce((a, b) => (b.extent < a.extent ? b : a))];
+          }),
+        );
+        const visible = (n: string) => boxes.get(n)!.extent >= bind.extent * 0.35;
+        // у образов с превращениями бывает, что ни одна анимация не держит модель на виду — тогда поза привязки
+        const start = ordered.find((n) => /idle/i.test(n) && visible(n)) ?? ordered.find(visible) ?? null;
+        // Кадр по меньшей из рамок — позы привязки и стартовой анимации: в одной лишние формы сложены
+        // на месте, в другой анимация уносит спрятанные части в сторону.
+        const startBox = start ? boxes.get(start)! : bind;
+        const frameBox = startBox.extent > 0 && (startBox.extent < bind.extent || bind.extent === 0) ? startBox.box : bind.box;
+        mixer.stopAllAction();
+        // исходная поза узлов, а не skeleton.pose(): у некоторых образов матрицы привязки с ней не совпадают
+        for (const [o, [p, q, s]] of rest) {
+          o.position.copy(p);
+          o.quaternion.copy(q);
+          o.scale.copy(s);
+        }
+
         // кадр по размеру модели
-        root.traverse((o) => (o as THREE.SkinnedMesh).isSkinnedMesh && (o as THREE.SkinnedMesh).computeBoundingBox());
-        const box = new THREE.Box3().setFromObject(root);
-        const size = box.getSize(new THREE.Vector3());
-        const center = box.getCenter(new THREE.Vector3());
-        const radius = Math.max(size.x, size.y, size.z) / 2;
+        const size = frameBox.getSize(new THREE.Vector3());
+        const center = frameBox.getCenter(new THREE.Vector3());
+        const radius = Math.max(size.x, size.y, size.z) / 2 || 100;
         const distance = radius / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.05;
         camera.position.set(center.x, center.y + radius * 0.15, center.z + distance);
         camera.near = distance / 100;
@@ -83,13 +133,10 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
           if (!mesh.isMesh) return;
           for (const m of [mesh.material].flat() as THREE.MeshStandardMaterial[]) original.set(m, m.map ?? null);
         });
-        const mixer = new THREE.AnimationMixer(root);
         const chromas = (gltf.userData?.riftden?.chromas ?? {}) as Record<string, Record<string, string>>;
         scene.current = { mixer, clips: gltf.animations, original, chromas };
-        const names = gltf.animations.map((c) => c.name);
-        const ordered = [...animations.filter((a) => names.includes(a)), ...names.filter((n) => !animations.includes(n))];
         setClips(ordered);
-        setCurrent(ordered.find((n) => /idle/i.test(n)) ?? ordered[0] ?? null);
+        setCurrent(start);
         setState('ready');
       },
       undefined,
