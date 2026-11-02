@@ -27,6 +27,7 @@
 }
 
 .fighter[data-side='red'] {
+  --side-text: var(--enemy-text);
   grid-column: 3;
   grid-row: 1;
   grid-template-columns: minmax(0, 1fr) 196px;
@@ -132,7 +133,7 @@
 }
 
 .sideName {
-  color: var(--side);
+  color: var(--side-text, var(--side));
   font-size: var(--fs-12);
   font-weight: 600;
 }

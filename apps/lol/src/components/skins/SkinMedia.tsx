@@ -80,7 +80,16 @@ async function mediaOf(id: number) {
 }
 
 /** 3D-модель и озвучка образа. Пока для образа нет файлов медиа-конвейера, блок не показывается. */
-export function SkinMedia({ id, chromas }: { id: number; chromas: { id: number; name: string; colors: string[] }[] }) {
+export function SkinMedia({
+  id,
+  chromas,
+  championNames = {},
+}: {
+  id: number;
+  chromas: { id: number; name: string; colors: string[] }[];
+  /** имена чемпионов по id на языке страницы — для реплик «союзник: Орн» */
+  championNames?: Record<string, string>;
+}) {
   const locale = useLocale();
   const t = MESSAGES[locale];
   const [media, setMedia] = useState<Awaited<ReturnType<typeof mediaOf>> | null>(null);
@@ -110,7 +119,7 @@ export function SkinMedia({ id, chromas }: { id: number; chromas: { id: number; 
   // реплики по группам в порядке VOICE_GROUPS: передвижение, атака, убийства…
   const byGroup = new Map<VoiceGroup, { line: VoiceLine; detail: string }[]>();
   for (const line of lines) {
-    const { group, detail } = voiceLine(line.event, locale);
+    const { group, detail } = voiceLine(line.event, locale, championNames);
     byGroup.set(group, [...(byGroup.get(group) ?? []), { line, detail }]);
   }
   const groups = VOICE_GROUPS.filter((g) => byGroup.has(g)).map((g) => [g, byGroup.get(g)!] as const);
@@ -183,7 +192,7 @@ export function SkinMedia({ id, chromas }: { id: number; chromas: { id: number; 
               </summary>
               <ol className={styles.lines}>
                 {items.map(({ line, detail }, i) => {
-                  const label = detail || t.line(i + 1);
+                  const label = detail ? detail[0].toUpperCase() + detail.slice(1) : t.line(i + 1);
                   return (
                     <li key={line.file}>
                       <button type="button" aria-pressed={playing === line.file} onClick={() => play(line.file)} aria-label={`${t.play}: ${VOICE_LABELS[locale][group]}, ${label}`}>

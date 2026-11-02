@@ -40,6 +40,9 @@
 }
 
 .crumbs {
+  /* у крупного заголовка с плотным межстрочным текст выступает вверх и перехватывает клик по крошкам */
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 6px;

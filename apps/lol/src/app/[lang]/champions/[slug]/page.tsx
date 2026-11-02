@@ -340,7 +340,7 @@ export default async function ChampionPage({ params }: Params) {
                 {c.tactical && <Tag>{ATTACK_TYPES[lang][c.tactical.attackType]}</Tag>}
                 {c.tactical && <Tag>{t.damage(DAMAGE_TYPES[lang][c.tactical.damageType])}</Tag>}
                 <Tag title={c.info.difficulty ? `Riot: ${t.outOf10(c.info.difficulty)}` : undefined}>{t.difficultyTag(DIFFICULTY[lang][diff].toLowerCase())}</Tag>
-                <FavoriteButton kind="champion" id={c.slug} />
+                <FavoriteButton kind="champion" id={c.slug} tag />
                 <Tag href={`/builds?c=${c.slug}${c.positions[0] ? `&lane=${c.positions[0].toLowerCase()}` : ''}`} icon={<Icon name="sliders" size={15} />} color="var(--ally)">
                   {t.build}
                 </Tag>

@@ -1,0 +1,61 @@
+/* Текстовые страницы (методика, приватность): текст 18 px, межстрочный 1,7, строка до 70 знаков — как в DESIGN.md. */
+.prose {
+  max-width: 900px;
+  padding-bottom: 64px;
+}
+
+.body {
+  max-width: 70ch;
+  font-size: var(--fs-18);
+  line-height: 1.7;
+}
+
+.body section + section {
+  margin-top: 36px;
+}
+
+.body h2 {
+  margin-bottom: 10px;
+  font-size: var(--fs-24);
+}
+
+.body p + p,
+.body p + ul,
+.body ul + p {
+  margin-top: 12px;
+}
+
+.body ul {
+  padding-left: 1.2em;
+  list-style: square;
+}
+
+.body li + li {
+  margin-top: 4px;
+}
+
+.body li::marker {
+  color: var(--ash-2);
+}
+
+.body a {
+  color: var(--ally);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.body a:hover {
+  color: var(--bone);
+}
+
+.meta {
+  margin-bottom: 28px;
+  color: var(--ash);
+  font-size: var(--fs-16);
+}
+
+.footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}

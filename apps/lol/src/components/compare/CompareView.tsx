@@ -44,7 +44,8 @@ const MESSAGES = defineMessages({
     search: 'Имя чемпиона',
     vs: 'против',
     ticks: 'Делений на полоске здоровья столько, сколько сотен здоровья у чемпиона на этом уровне.',
-    more: (pct: string, name: string) => `+${pct}% у ${name}`,
+    // имя не склоняем: «у Дариус» звучит как ошибка
+    more: (pct: string, name: string) => `${name}: +${pct}%`,
     even: 'поровну',
     playstyle: 'Стиль игры',
     ratings: 'Оценки Riot от 1 до 3',

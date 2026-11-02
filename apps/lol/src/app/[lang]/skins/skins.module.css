@@ -12,6 +12,13 @@
   height: min(70vh, 640px);
   z-index: -1;
   overflow: hidden;
+  pointer-events: none;
+}
+
+/* фон выше шапки страницы и заходит на следующий блок: блок рисуется поверх фона, иначе фон гасит и перекрывает
+   вкладки артов, заголовок списка и ссылку «В каталоге» */
+.hero + * {
+  position: relative;
 }
 
 .heroBg img {
@@ -48,6 +55,9 @@
 }
 
 .crumbs {
+  /* у крупного заголовка с плотным межстрочным текст выступает вверх и перехватывает клик по крошкам */
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 6px;

@@ -244,7 +244,8 @@ export function StatsBoard({ champions }: { champions: BoardChampion[] }) {
           </label>
         </div>
         <p className={styles.note}>{t.sortNote}</p>
-        <div className={styles.scroll}>
+        {/* таблица прокручивается в своём блоке — область доступна с клавиатуры */}
+        <div className={styles.scroll} tabIndex={0} role="region" aria-label={t.everyone(level)}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -296,7 +297,7 @@ export function StatsBoard({ champions }: { champions: BoardChampion[] }) {
       <section className={styles.section}>
         <h2>{t.classAvg}</h2>
         <p className={styles.note}>{t.classNote}</p>
-        <div className={styles.scroll}>
+        <div className={styles.scroll} tabIndex={0} role="region" aria-label={t.classAvg}>
           <table className={styles.table}>
             <thead>
               <tr>

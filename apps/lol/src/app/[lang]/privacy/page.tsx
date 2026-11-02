@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import Link from '@rift/engine/i18n/Link';
 import { PageHead } from '@rift/engine/ui/PageHead';
 import { alternates, defineMessages, langOf } from '@/lib/i18n';
+import styles from '../prose.module.css';
+
+const SUPPORT = 'support@riftden.com';
 
 const TEXT = defineMessages({
   ru: {
@@ -17,7 +20,7 @@ const TEXT = defineMessages({
       ['Удаление', 'Аккаунт удаляется в настройках: вместе с ним сразу удаляются избранное и все сессии. Из резервных копий данные исчезают не позже чем через 14 дней.'],
     ] as [string, string][],
     settings: 'Открыть настройки аккаунта',
-    contact: 'Вопросы о данных: support@riftden.com.',
+    contact: 'Вопросы о данных:',
   },
   en: {
     title: 'Data and privacy',
@@ -32,7 +35,7 @@ const TEXT = defineMessages({
       ['Deletion', 'Delete the account in the settings: favorites and all sessions are deleted with it at once. Backups lose the data within 14 days.'],
     ] as [string, string][],
     settings: 'Open account settings',
-    contact: 'Questions about your data: support@riftden.com.',
+    contact: 'Questions about your data:',
   },
 });
 
@@ -44,18 +47,24 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 export default async function PrivacyPage({ params }: { params: Promise<{ lang: string }> }) {
   const t = TEXT[await langOf(params)];
   return (
-    <div className="container" style={{ maxWidth: 900, paddingBottom: 64 }}>
+    <div className={`container ${styles.prose}`}>
       <PageHead title={t.title}>{t.description}</PageHead>
-      {t.sections.map(([title, text]) => (
-        <section key={title}>
-          <h2>{title}</h2>
-          <p>{text}</p>
-        </section>
-      ))}
-      <p>
-        <Link href="/account/settings">{t.settings}</Link>
-      </p>
-      <p>{t.contact}</p>
+      <div className={styles.body}>
+        {t.sections.map(([title, text]) => (
+          <section key={title}>
+            <h2>{title}</h2>
+            <p>{text}</p>
+          </section>
+        ))}
+        <div className={styles.footer}>
+          <p>
+            <Link href="/account/settings">{t.settings}</Link>
+          </p>
+          <p>
+            {t.contact} <a href={`mailto:${SUPPORT}`}>{SUPPORT}</a>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

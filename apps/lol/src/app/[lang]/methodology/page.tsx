@@ -5,6 +5,7 @@ import { formatDate } from '@rift/engine/lib/format';
 import { UPDATED_AT } from '@/lib/champions';
 import { DATA_VERSION } from '@/lib/assets';
 import { alternates, defineMessages, langOf } from '@/lib/i18n';
+import styles from '../prose.module.css';
 const MESSAGES = defineMessages({
   ru: { title: 'Данные и методика расчётов', description: 'Источники данных RiftDen, формулы характеристик и ограничения сравнения чемпионов, дуэлей и билдов.',
     updated: 'Данные обновлены', patch: 'Патч', sources: 'Источники',
@@ -29,9 +30,10 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 export default async function Methodology({ params }: { params: Promise<{ lang: string }> }) {
   const lang = await langOf(params); const t = MESSAGES[lang];
-  return <div className="container" style={{ maxWidth: 900, paddingBottom: 64 }}>
+  return <div className={`container ${styles.prose}`}>
     <PageHead title={t.title}>{t.description}</PageHead>
-    <p>{t.patch} {DATA_VERSION} · {t.updated}: <time dateTime={UPDATED_AT.toISOString()}>{formatDate(UPDATED_AT, lang)}</time></p>
+    <div className={styles.body}>
+    <p className={styles.meta}>{t.patch} {DATA_VERSION}. {t.updated}: <time dateTime={UPDATED_AT.toISOString()}>{formatDate(UPDATED_AT, lang)}</time></p>
     <section><h2>{t.sources}</h2><p>{t.sourceText}</p><ul>
       <li><a href="https://developer.riotgames.com/docs/lol#data-dragon">Riot Data Dragon</a></li>
       <li><a href="https://www.communitydragon.org/">CommunityDragon</a></li>
@@ -41,5 +43,6 @@ export default async function Methodology({ params }: { params: Promise<{ lang: 
     <section><h2>{t.stats}</h2><p>{t.statsText}</p></section>
     <section><h2>{t.limits}</h2><p>{t.limitsText}</p><p>{t.duelText}</p><p>{t.buildText}</p></section>
     <section><h2>{t.links}</h2><ul><li><Link href="/compare">{t.compare}</Link></li><li><Link href="/builds">{t.builds}</Link></li><li><Link href="/tier-list">{t.tier}</Link></li></ul></section>
+    </div>
   </div>;
 }

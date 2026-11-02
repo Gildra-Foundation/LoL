@@ -23,6 +23,8 @@ interface FavoriteButtonProps {
   id: string | number;
   /** только значок с подписью для экранного диктора — для карточек каталога */
   compact?: boolean;
+  /** в ряду меток (класс, редкость) — высотой с метку */
+  tag?: boolean;
   className?: string;
 }
 
@@ -30,7 +32,7 @@ interface FavoriteButtonProps {
  * «♡ В избранное». Гостю открывает окно входа и добавляет объект сразу после входа.
  * Если аккаунты на сервере не настроены, кнопки нет.
  */
-export function FavoriteButton({ kind, id, compact = false, className }: FavoriteButtonProps) {
+export function FavoriteButton({ kind, id, compact = false, tag = false, className }: FavoriteButtonProps) {
   const t = useMessages(MESSAGES);
   const { status, favorites, toggleFavorite, openAuth } = useAccount();
   const ref = String(id);
@@ -61,7 +63,7 @@ export function FavoriteButton({ kind, id, compact = false, className }: Favorit
   return (
     <button
       type="button"
-      className={[styles.button, compact ? styles.compact : '', className].filter(Boolean).join(' ')}
+      className={[styles.button, compact ? styles.compact : '', tag ? styles.tag : '', className].filter(Boolean).join(' ')}
       aria-pressed={status === 'user' ? active : false}
       // у значка подпись постоянная, состояние передаёт aria-pressed
       aria-label={compact ? t.add : undefined}
@@ -77,7 +79,7 @@ export function FavoriteButton({ kind, id, compact = false, className }: Favorit
         void toggle();
       }}
     >
-      <Icon name="favorite" size={compact ? 18 : 20} className={styles.icon} />
+      <Icon name="favorite" size={compact ? 18 : tag ? 15 : 20} className={styles.icon} />
       {!compact && <span>{label}</span>}
     </button>
   );

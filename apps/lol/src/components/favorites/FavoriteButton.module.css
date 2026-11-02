@@ -35,6 +35,16 @@
   background: rgba(18, 26, 23, 0.82);
 }
 
+.tag {
+  gap: 7px;
+  height: 30px;
+  padding: 0 11px 0 9px;
+  background: rgba(18, 26, 23, 0.82);
+  box-shadow: inset 0 0 0 1px var(--line);
+  border-radius: 2px;
+  font-weight: 500;
+}
+
 .icon {
   flex: none;
 }

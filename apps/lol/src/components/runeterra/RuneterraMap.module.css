@@ -889,6 +889,18 @@
   }
 }
 
+/* на телефоне подписи соседних регионов наезжают друг на друга: на карте только точки и подпись выбранного,
+   названия — в списке над картой; для экранного диктора подпись остаётся */
+@media (max-width: 600px) {
+  .marker:not([aria-pressed='true']) .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
 @media (hover: none) {
   .tip {
     display: none;
