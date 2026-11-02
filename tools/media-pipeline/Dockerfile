@@ -2,7 +2,7 @@
 # Build:  docker build -t riftden-media:<tag> tools/media-pipeline
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS riftmodel
 WORKDIR /src
-COPY riftmodel/riftmodel.csproj riftmodel/Program.cs ./
+COPY riftmodel/riftmodel.csproj riftmodel/*.cs ./
 RUN dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o /out
 
 FROM node:22.23.2-bookworm-slim
