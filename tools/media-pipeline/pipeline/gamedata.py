@@ -235,7 +235,7 @@ class ChampionData:
 
     # ---- animations -----------------------------------------------------
     def animation_files(self, skin, binhashes: BinHashes):
-        """[(output name, anm path hash, submesh events)] picked from the skin animation graph.
+        """[(output name, anm path hash, submesh events, particle events)] picked from the skin animation graph.
 
         Events are SubmeshVisibilityEventData of the atomic clip: frames plus FNV hashes of the
         submeshes to show/hide (weapons, props, Nunu's snowman, teeth and claws swaps)."""
@@ -265,7 +265,10 @@ class ChampionData:
                 if p is None:
                     return None
                 ph = p.value.h if hasattr(p.value, "h") else path_hash(p.value)
-                return (ph, clip_events(clip)) if self.wad.has(ph) else None
+                if not self.wad.has(ph):
+                    return None
+                import vfx  # late: vfx imports gamedata
+                return (ph, clip_events(clip), vfx.particle_events(clip))
             refs = []
             for f in clip.fields:
                 _walk_hashes(f.value, refs)
@@ -295,7 +298,7 @@ class ChampionData:
                         break
             if found and found[0] not in used:
                 used.add(found[0])
-                picked.append((out, found[0], found[1]))
+                picked.append((out, found[0], found[1], found[2]))
         return picked
 
     # ---- model ----------------------------------------------------------

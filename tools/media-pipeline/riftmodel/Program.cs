@@ -12,6 +12,7 @@ using LeagueToolkit.Core.Animation;
 using LeagueToolkit.Core.Mesh;
 using LeagueToolkit.IO.SimpleSkinFile;
 using LeagueToolkit.Toolkit;
+using LeagueToolkit.Toolkit.Gltf;
 using SixLabors.ImageSharp;
 using LeagueTexture = LeagueToolkit.Core.Renderer.Texture;
 
@@ -64,7 +65,29 @@ static class Program
             TexToPng(args[1], args[2]);
             return 0;
         }
-        Console.Error.WriteLine("usage: riftmodel batch <jobs.jsonl> | tex2png <in.tex> <out.png>");
+        if (args.Length == 2 && args[0] == "scb2glb")
+        {
+            // effect meshes, one "in.scb out.glb" pair per line; prints one JSON result per pair
+            foreach (string line in File.ReadLines(args[1]))
+            {
+                string[] io = line.Split('\t');
+                if (io.Length != 2) continue;
+                try
+                {
+                    using FileStream s = File.OpenRead(io[0]);
+                    StaticMesh mesh = io[0].EndsWith(".sco", StringComparison.OrdinalIgnoreCase) ? StaticMesh.ReadAscii(s) : StaticMesh.ReadBinary(s);
+                    Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(io[1])));
+                    mesh.ToGltf().SaveGLB(io[1]);
+                    Console.WriteLine(JsonSerializer.Serialize(new { @in = io[0], ok = true }));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(JsonSerializer.Serialize(new { @in = io[0], ok = false, error = e.GetType().Name + ": " + e.Message }));
+                }
+            }
+            return 0;
+        }
+        Console.Error.WriteLine("usage: riftmodel batch <jobs.jsonl> | tex2png <in.tex> <out.png> | scb2glb <pairs.tsv>");
         return 2;
     }
 
