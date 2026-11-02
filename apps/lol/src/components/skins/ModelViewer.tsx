@@ -7,8 +7,17 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import styles from './SkinMedia.module.css';
 
+interface SubmeshEvent {
+  start: number;
+  end: number | null;
+  show: string[];
+  hide: string[];
+}
+
 export interface ModelViewerProps {
   url: string;
+  /** остальные анимации отдельным файлом: грузятся в фоне, когда модель уже на экране */
+  animsUrl: string | null;
   /** порядок кнопок анимаций; имена клипов из glb */
   animations: string[];
   animationLabel: (name: string) => string;
@@ -20,9 +29,17 @@ export interface ModelViewerProps {
 }
 
 /** 3D-модель образа: вращение мышью или пальцем, колесо — приближение, кнопки — анимации из игры. */
-export default function ModelViewer({ url, animations, animationLabel, base, chroma, labels }: ModelViewerProps) {
+export default function ModelViewer({ url, animsUrl, animations, animationLabel, base, chroma, labels }: ModelViewerProps) {
   const host = useRef<HTMLDivElement>(null);
-  const scene = useRef<{ mixer: THREE.AnimationMixer; clips: THREE.AnimationClip[]; original: Map<THREE.Material, THREE.Texture | null>; chromas: Record<string, Record<string, string>> } | null>(null);
+  const scene = useRef<{
+    mixer: THREE.AnimationMixer;
+    clips: THREE.AnimationClip[];
+    original: Map<THREE.Material, THREE.Texture | null>;
+    chromas: Record<string, Record<string, string>>;
+    /** видимость частей модели в момент t анимации: скрытые при появлении части и события клипа */
+    showAt: (clip: string | null, t: number) => void;
+  } | null>(null);
+  const currentRef = useRef<string | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [clips, setClips] = useState<string[]>([]);
   const [current, setCurrent] = useState<string | null>(null);
@@ -66,6 +83,29 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
         // где первый кадр анимации сжат в точку, модель иначе пропадала навсегда.
         root.traverse((o) => (o.frustumCulled = false));
         world.add(root);
+
+        // Части, спрятанные при появлении (оружие, реквизит, снеговик Нуну, вторая форма), и события
+        // анимаций, которые их показывают и прячут — как в игре.
+        const extras = (gltf.userData?.riftden ?? {}) as { hidden?: string[]; events?: Record<string, SubmeshEvent[]>; chromas?: Record<string, Record<string, string>> };
+        const parts = new Map<string, THREE.Object3D[]>();
+        root.traverse((o) => {
+          const mesh = o as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          const name = ([mesh.material].flat()[0] as THREE.Material).name.toLowerCase();
+          parts.set(name, [...(parts.get(name) ?? []), mesh]);
+        });
+        const hidden = new Set((extras.hidden ?? []).map((n) => n.toLowerCase()));
+        const showAt = (clip: string | null, t: number) => {
+          const shown = new Map<string, boolean>();
+          for (const name of parts.keys()) shown.set(name, !hidden.has(name));
+          for (const ev of (clip && extras.events?.[clip]) || []) {
+            if (t < ev.start || (ev.end !== null && t >= ev.end)) continue;
+            for (const n of ev.show) shown.set(n.toLowerCase(), true);
+            for (const n of ev.hide) shown.set(n.toLowerCase(), false);
+          }
+          for (const [name, objects] of parts) for (const o of objects) o.visible = shown.get(name) ?? true;
+        };
+        showAt(null, 0);
         const mixer = new THREE.AnimationMixer(root);
         const names = gltf.animations.map((c) => c.name);
         const ordered = [...animations.filter((a) => names.includes(a)), ...names.filter((n) => !animations.includes(n))];
@@ -81,7 +121,7 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
           const b = new THREE.Box3();
           root.traverse((o) => {
             const mesh = o as THREE.SkinnedMesh;
-            if (!mesh.isSkinnedMesh) return;
+            if (!mesh.isSkinnedMesh || !mesh.visible) return;
             mesh.computeBoundingBox();
             b.union(mesh.boundingBox!.clone().applyMatrix4(mesh.matrixWorld));
           });
@@ -97,7 +137,10 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
           ordered.map((n) => {
             const clip = gltf.animations.find((c) => c.name === n);
             const samples = [0.05, 0.3, 0.55, 0.8].map((at) => posed(clip, at));
-            return [n, samples.reduce((a, b) => (b.extent < a.extent ? b : a))];
+            // видимость — по самому «сжатому» моменту, кадр — по рамке всех моментов
+            const box = samples.reduce((acc, x) => acc.union(x.box), new THREE.Box3());
+            const size = box.getSize(new THREE.Vector3());
+            return [n, { box, extent: Math.min(...samples.map((x) => x.extent)), span: [size.x, size.y, size.z].every(Number.isFinite) ? Math.max(size.x, size.y, size.z) : 0 }];
           }),
         );
         const visible = (n: string) => boxes.get(n)!.extent >= bind.extent * 0.35;
@@ -105,8 +148,8 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
         const start = ordered.find((n) => /idle/i.test(n) && visible(n)) ?? ordered.find(visible) ?? null;
         // Кадр по меньшей из рамок — позы привязки и стартовой анимации: в одной лишние формы сложены
         // на месте, в другой анимация уносит спрятанные части в сторону.
-        const startBox = start ? boxes.get(start)! : bind;
-        const frameBox = startBox.extent > 0 && (startBox.extent < bind.extent || bind.extent === 0) ? startBox.box : bind.box;
+        const startBox = start ? boxes.get(start)! : { ...bind, span: bind.extent };
+        const frameBox = startBox.span > 0 && (startBox.span < bind.extent || bind.extent === 0) ? startBox.box : bind.box;
         mixer.stopAllAction();
         // исходная поза узлов, а не skeleton.pose(): у некоторых образов матрицы привязки с ней не совпадают
         for (const [o, [p, q, s]] of rest) {
@@ -133,11 +176,34 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
           if (!mesh.isMesh) return;
           for (const m of [mesh.material].flat() as THREE.MeshStandardMaterial[]) original.set(m, m.map ?? null);
         });
-        const chromas = (gltf.userData?.riftden?.chromas ?? {}) as Record<string, Record<string, string>>;
-        scene.current = { mixer, clips: gltf.animations, original, chromas };
+        const chromas = extras.chromas ?? {};
+        const loaded = [...gltf.animations];
+        scene.current = { mixer, clips: loaded, original, chromas, showAt };
         setClips(ordered);
         setCurrent(start);
         setState('ready');
+
+        // Остальные анимации — вторым файлом, когда модель уже видна. Имена узлов те же, клипы
+        // подключаются к уже загруженному скелету.
+        if (animsUrl) {
+          loader.load(animsUrl, (more) => {
+            if (disposed) return;
+            loaded.push(...more.animations);
+            const names = loaded.map((c) => c.name);
+            setClips([...animations.filter((a) => names.includes(a)), ...names.filter((n) => !animations.includes(n))]);
+            // ожидание не показало модель (образы с превращениями) — первая анимация, где она видна
+            if (!currentRef.current) {
+              const playing = more.animations.find((clip) => [0.05, 0.3, 0.55, 0.8].every((at) => posed(clip, at).extent >= bind.extent * 0.35));
+              mixer.stopAllAction();
+              for (const [o, [p, q, s]] of rest) {
+                o.position.copy(p);
+                o.quaternion.copy(q);
+                o.scale.copy(s);
+              }
+              if (playing) setCurrent(playing.name);
+            }
+          });
+        }
       },
       undefined,
       () => !disposed && setState('error'),
@@ -145,7 +211,13 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
 
     const tick = () => {
       frame = requestAnimationFrame(tick);
-      scene.current?.mixer.update(clock.getDelta());
+      const s = scene.current;
+      if (s) {
+        s.mixer.update(clock.getDelta());
+        const name = currentRef.current;
+        const clip = name ? s.clips.find((c) => c.name === name) : undefined;
+        s.showAt(name, clip ? s.mixer.existingAction(clip)?.time ?? 0 : 0);
+      }
       controls.update();
       renderer.render(world, camera);
     };
@@ -169,17 +241,18 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
       renderer.domElement.remove();
       scene.current = null;
     };
-  }, [url, animations]);
+  }, [url, animsUrl, animations]);
 
   // анимация
   useEffect(() => {
+    currentRef.current = current;
     const s = scene.current;
     if (!s || !current) return;
     const clip = s.clips.find((c) => c.name === current);
     if (!clip) return;
     s.mixer.stopAllAction();
     s.mixer.clipAction(clip).reset().fadeIn(0.2).play();
-  }, [current, state]);
+  }, [current, state, clips]);
 
   // хрома: свои текстуры у перечисленных материалов (имя материала → файл)
   useEffect(() => {
@@ -217,10 +290,11 @@ export default function ModelViewer({ url, animations, animationLabel, base, chr
       <div ref={host} className={styles.canvas} role="img" aria-label={labels.rotate}>
         {state !== 'ready' && <p className={styles.overlay}>{state === 'loading' ? labels.loading : labels.error}</p>}
       </div>
-      {clips.length > 1 && (
+      {animations.length > 1 && clips.length > 0 && (
         <div className={styles.anims} role="group" aria-label={labels.animations}>
-          {clips.map((name) => (
-            <button key={name} type="button" aria-pressed={current === name} onClick={() => setCurrent(name)}>
+          {[...clips, ...animations.filter((n) => !clips.includes(n))].map((name) => (
+            // ещё не догруженные анимации видны сразу, но нажимаются, когда придут
+            <button key={name} type="button" aria-pressed={current === name} disabled={!clips.includes(name)} onClick={() => setCurrent(name)}>
               {animationLabel(name)}
             </button>
           ))}

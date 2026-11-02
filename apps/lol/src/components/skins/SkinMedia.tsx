@@ -64,7 +64,7 @@ interface VoiceLine {
 /** Запись медиа-конвейера для одного образа (tools/media-pipeline). */
 export interface MediaEntry {
   chromas?: Record<string, { image?: string; texture?: string }>;
-  model?: { glb: string; animations: string[]; bytes?: number };
+  model?: { glb: string; animations: string[]; bytes?: number; anims?: string; animsBytes?: number };
   vo?: Partial<Record<Locale, VoiceLine[]>>;
   voFrom?: number;
 }
@@ -94,6 +94,7 @@ export function SkinMedia({
   const t = MESSAGES[locale];
   const [media, setMedia] = useState<Awaited<ReturnType<typeof mediaOf>> | null>(null);
   const [show3d, setShow3d] = useState(false);
+  const modelBlock = useRef<HTMLElement>(null);
   const [chroma, setChroma] = useState<number | null>(null);
   const [lang, setLang] = useState<Locale>(locale);
   const [playing, setPlaying] = useState<string | null>(null);
@@ -109,6 +110,27 @@ export function SkinMedia({
       audio.current?.pause();
     };
   }, [id]);
+
+  // Модель включается сама, когда блок доходит до экрана; файл начинает качаться сразу,
+  // параллельно с кодом three.js. С включённой экономией трафика — по кнопке.
+  const glbUrl = media?.entry.model ? media.base + media.entry.model.glb : null;
+  useEffect(() => {
+    const el = modelBlock.current;
+    if (!el || !glbUrl || show3d) return;
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (saveData) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        void fetch(glbUrl).catch(() => undefined);
+        setShow3d(true);
+      },
+      { rootMargin: '300px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [glbUrl, show3d]);
 
   if (!media || (!media.entry.model && !media.vo)) return null;
   const { base, entry } = media;
@@ -137,12 +159,13 @@ export function SkinMedia({
   return (
     <div className={styles.media}>
       {entry.model && (
-        <section className={styles.section}>
+        <section className={styles.section} ref={modelBlock}>
           <h2 className={styles.h3}>{t.model}</h2>
           <p className={styles.lead}>{t.modelLead}</p>
           {show3d ? (
             <ModelViewer
               url={base + entry.model.glb}
+              animsUrl={entry.model.anims ? base + entry.model.anims : null}
               animations={entry.model.animations}
               animationLabel={(name) => t.anims[name.toLowerCase()] ?? name}
               base={base}
